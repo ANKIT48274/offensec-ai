@@ -7,19 +7,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY backend/pyproject.toml backend/
-RUN pip install --no-cache-dir backend/
+# Install Python dependencies first (caching layer)
+COPY backend/pyproject.toml /tmp/backend/
+RUN pip install --no-cache-dir /tmp/backend/
 
+# Copy all backend source code
 COPY backend/ backend/
+
+ENV PYTHONPATH=/app
 
 RUN addgroup --system --gid 1001 offensec && \
     adduser --system --uid 1001 --no-create-home offensec && \
     mkdir -p /var/log/offensec && \
-    chown -R offensec:offensec /app/backend /var/log/offensec
+    chown -R offensec:offensec /app /var/log/offensec
 
 USER offensec
-
-WORKDIR /app/backend
 
 EXPOSE 8000
 
