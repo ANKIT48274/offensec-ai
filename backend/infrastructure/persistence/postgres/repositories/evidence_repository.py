@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Any
-
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.application.dto import EvidenceResponseDTO
 from backend.infrastructure.persistence.postgres.models import EvidenceModelNew
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class EvidenceRepository:
@@ -19,6 +17,7 @@ class EvidenceRepository:
     async def create(self, data: dict[str, Any]) -> EvidenceResponseDTO:
         if "id" not in data:
             import uuid
+
             data["id"] = uuid.uuid4().hex
         model = EvidenceModelNew(**data)
         self._session.add(model)
@@ -28,6 +27,7 @@ class EvidenceRepository:
 
     async def bulk_create(self, entries: list[dict[str, Any]]) -> list[EvidenceResponseDTO]:
         import uuid
+
         models = []
         for e in entries:
             if "id" not in e:
@@ -46,13 +46,19 @@ class EvidenceRepository:
         self, project_id: str, page: int, page_size: int, source: str | None = None
     ) -> tuple[list[EvidenceResponseDTO], int]:
         query = select(EvidenceModelNew).where(EvidenceModelNew.project_id == project_id)
-        count_query = select(func.count(EvidenceModelNew.id)).where(EvidenceModelNew.project_id == project_id)
+        count_query = select(func.count(EvidenceModelNew.id)).where(
+            EvidenceModelNew.project_id == project_id
+        )
 
         if source and source != "all":
             query = query.where(EvidenceModelNew.source == source)
             count_query = count_query.where(EvidenceModelNew.source == source)
 
-        query = query.order_by(EvidenceModelNew.captured_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        query = (
+            query.order_by(EvidenceModelNew.captured_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         result = await self._session.execute(query)
         models = list(result.scalars().all())
 
@@ -63,7 +69,8 @@ class EvidenceRepository:
 
     async def list_by_asset(self, asset_id: str) -> list[EvidenceResponseDTO]:
         result = await self._session.execute(
-            select(EvidenceModelNew).where(EvidenceModelNew.asset_id == asset_id)
+            select(EvidenceModelNew)
+            .where(EvidenceModelNew.asset_id == asset_id)
             .order_by(EvidenceModelNew.captured_at.desc())
         )
         return [self._to_dto(m) for m in result.scalars().all()]

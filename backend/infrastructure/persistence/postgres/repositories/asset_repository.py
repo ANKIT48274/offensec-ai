@@ -5,18 +5,19 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select, func, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.application.dto import AssetResponseDTO
 from backend.infrastructure.persistence.postgres.models import AssetModel
+from sqlalchemy import func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class AssetRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    async def upsert(self, project_id: str, asset_type: str, value: str, data: dict[str, Any]) -> AssetResponseDTO:
+    async def upsert(
+        self, project_id: str, asset_type: str, value: str, data: dict[str, Any]
+    ) -> AssetResponseDTO:
         existing = await self._find_exact(project_id, value)
         if existing:
             return await self._merge(existing, data)
@@ -80,7 +81,12 @@ class AssetRepository:
         return self._to_dto(model) if model else None
 
     async def list_by_project(
-        self, project_id: str, page: int, page_size: int, asset_type: str | None = None, search: str | None = None
+        self,
+        project_id: str,
+        page: int,
+        page_size: int,
+        asset_type: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[AssetResponseDTO], int]:
         query = select(AssetModel).where(AssetModel.project_id == project_id)
         count_query = select(func.count(AssetModel.id)).where(AssetModel.project_id == project_id)
@@ -94,9 +100,9 @@ class AssetRepository:
             query = query.where(
                 or_(
                     AssetModel.value.ilike(like),
-                                    AssetModel.label.ilike(like),
-                                )
-                            )
+                    AssetModel.label.ilike(like),
+                )
+            )
             count_query = count_query.where(
                 or_(
                     AssetModel.value.ilike(like),
@@ -104,7 +110,11 @@ class AssetRepository:
                 )
             )
 
-        query = query.order_by(AssetModel.last_seen.desc()).offset((page - 1) * page_size).limit(page_size)
+        query = (
+            query.order_by(AssetModel.last_seen.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         result = await self._session.execute(query)
         models = list(result.scalars().all())
 
@@ -135,7 +145,9 @@ class AssetRepository:
         )
 
 
-def _merge_ports(existing: list[dict[str, Any]], incoming: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _merge_ports(
+    existing: list[dict[str, Any]], incoming: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     seen = {(p.get("port"), p.get("protocol")) for p in existing}
     merged = list(existing)
     for p in incoming:

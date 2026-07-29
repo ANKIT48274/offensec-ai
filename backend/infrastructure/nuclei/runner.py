@@ -26,9 +26,13 @@ async def run_nuclei(target_url: str, timeout: int = NUCLEI_TIMEOUT) -> dict[str
 
     cmd = [
         "nuclei",
-        "-target", target_url.strip(),
-        "-jsonl", "-o", out_path,
-        "-severity", "info,low,medium,high,critical",
+        "-target",
+        target_url.strip(),
+        "-jsonl",
+        "-o",
+        out_path,
+        "-severity",
+        "info,low,medium,high,critical",
     ]
 
     try:
@@ -39,7 +43,7 @@ async def run_nuclei(target_url: str, timeout: int = NUCLEI_TIMEOUT) -> dict[str
         )
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await _terminate_gracefully(proc)
             _cleanup(out_path)
             return {"error": f"Nuclei timed out after {timeout}s", "findings": []}
@@ -48,14 +52,17 @@ async def run_nuclei(target_url: str, timeout: int = NUCLEI_TIMEOUT) -> dict[str
 
         if not os.path.exists(out_path):
             if proc.returncode and proc.returncode != 0:
-                return {"error": f"Nuclei failed (exit {proc.returncode}): {err_text or 'unknown'}", "findings": []}
+                return {
+                    "error": f"Nuclei failed (exit {proc.returncode}): {err_text or 'unknown'}",
+                    "findings": [],
+                }
             return {"findings": [], "error": None}
 
         if os.path.getsize(out_path) == 0:
             _cleanup(out_path)
             return {"findings": [], "error": None}
 
-        with open(out_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(out_path, encoding="utf-8", errors="replace") as f:
             raw = f.read()
 
         _cleanup(out_path)

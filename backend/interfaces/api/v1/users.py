@@ -33,4 +33,6 @@ async def list_users(
     user_service: Any = Depends(get_user_service),
 ) -> Any:
     result = await user_service._user_repo.list(page, page_size)
-    return paginated_response([d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size)
+    return paginated_response(
+        [d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size
+    )

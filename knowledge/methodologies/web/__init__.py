@@ -62,7 +62,12 @@ WEB_METHODOLOGY = {
         },
         {
             "name": "API Testing",
-            "techniques": ["rate_limiting", "mass_assignment", "authentication_bypass", "injection"],
+            "techniques": [
+                "rate_limiting",
+                "mass_assignment",
+                "authentication_bypass",
+                "injection",
+            ],
         },
     ],
 }

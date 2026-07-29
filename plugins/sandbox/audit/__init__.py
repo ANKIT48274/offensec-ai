@@ -11,12 +11,14 @@ class SandboxAuditLog:
         self._entries: list[dict[str, Any]] = []
 
     def record(self, plugin_name: str, action: str, details: dict[str, Any] | None = None) -> None:
-        self._entries.append({
-            "plugin": plugin_name,
-            "action": action,
-            "details": details or {},
-            "timestamp": datetime.now(UTC).isoformat(),
-        })
+        self._entries.append(
+            {
+                "plugin": plugin_name,
+                "action": action,
+                "details": details or {},
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+        )
 
     def get_entries(self, plugin_name: str | None = None) -> list[dict[str, Any]]:
         if plugin_name:

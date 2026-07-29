@@ -23,12 +23,14 @@ class EvidenceCorrelator:
             ports = [i.get("port") for i in items if i.get("port")]
             vulnerabilities = [i for i in items if i.get("type") == "vulnerability"]
 
-            correlated.append({
-                "target": target,
-                "services": list(set(services)),
-                "ports": sorted(set(ports)),
-                "vulnerability_count": len(vulnerabilities),
-                "confidence": min(1.0, len(items) * 0.1 + 0.3),
-            })
+            correlated.append(
+                {
+                    "target": target,
+                    "services": list(set(services)),
+                    "ports": sorted(set(ports)),
+                    "vulnerability_count": len(vulnerabilities),
+                    "confidence": min(1.0, len(items) * 0.1 + 0.3),
+                }
+            )
 
         return correlated

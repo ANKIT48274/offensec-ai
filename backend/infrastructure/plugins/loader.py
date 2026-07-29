@@ -5,7 +5,6 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import os
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -16,7 +15,15 @@ PLUGIN_DIRS = [
 
 
 class PluginManifest:
-    def __init__(self, name: str, version: str, description: str, author: str, entry_point: str, capabilities: list[str] | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        version: str,
+        description: str,
+        author: str,
+        entry_point: str,
+        capabilities: list[str] | None = None,
+    ) -> None:
         self.name = name
         self.version = version
         self.description = description
@@ -45,6 +52,7 @@ class PluginLoader:
                     continue
                 try:
                     import json
+
                     data = json.loads(manifest_path.read_text())
                     manifest = PluginManifest(
                         name=data.get("name", subdir.name),
@@ -72,7 +80,9 @@ class PluginLoader:
         for plugin_dir in search_dirs:
             plugin_path = Path(plugin_dir) / name / manifest.entry_point
             if plugin_path.exists():
-                spec = importlib.util.spec_from_file_location(f"offensec_plugin_{name}", plugin_path)
+                spec = importlib.util.spec_from_file_location(
+                    f"offensec_plugin_{name}", plugin_path
+                )
                 if spec and spec.loader:
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
@@ -81,4 +91,7 @@ class PluginLoader:
         return None
 
     def list_loaded(self) -> list[tuple[str, str]]:
-        return [(name, self._manifests[name].version if name in self._manifests else "?") for name in self._plugins]
+        return [
+            (name, self._manifests[name].version if name in self._manifests else "?")
+            for name in self._plugins
+        ]

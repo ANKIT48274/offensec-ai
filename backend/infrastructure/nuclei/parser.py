@@ -60,15 +60,17 @@ def parse_nuclei_json(input_str: str) -> list[dict[str, Any]]:
             entries = json.loads(stripped)
             flat: list[dict[str, Any]] = []
             for entry in entries:
-                flat.append({
-                    "template_id": entry.get("template_id", ""),
-                    "template_name": entry.get("info", {}).get("name", ""),
-                    "severity": entry.get("info", {}).get("severity", "unknown"),
-                    "matched_url": entry.get("matched_at", ""),
-                    "tags": entry.get("info", {}).get("tags", []),
-                    "description": entry.get("info", {}).get("description", ""),
-                    "remediation": entry.get("info", {}).get("remediation", ""),
-                })
+                flat.append(
+                    {
+                        "template_id": entry.get("template_id", ""),
+                        "template_name": entry.get("info", {}).get("name", ""),
+                        "severity": entry.get("info", {}).get("severity", "unknown"),
+                        "matched_url": entry.get("matched_at", ""),
+                        "tags": entry.get("info", {}).get("tags", []),
+                        "description": entry.get("info", {}).get("description", ""),
+                        "remediation": entry.get("info", {}).get("remediation", ""),
+                    }
+                )
             return flat
         except json.JSONDecodeError:
             pass

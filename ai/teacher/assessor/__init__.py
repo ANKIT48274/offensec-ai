@@ -18,4 +18,11 @@ class SkillAssessor:
             level = "intermediate"
         else:
             level = "advanced"
-        return {"level": level, "score": accuracy, "completed": completed, "successful": successful, "strengths": [], "weaknesses": []}
+        return {
+            "level": level,
+            "score": accuracy,
+            "completed": completed,
+            "successful": successful,
+            "strengths": [],
+            "weaknesses": [],
+        }

@@ -9,11 +9,15 @@ from typing import Any
 class PDFReportGenerator:
     """Generates PDF reports from assessment findings."""
 
-    async def generate(self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None) -> str:
+    async def generate(
+        self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None
+    ) -> str:
         html = self._build_html(findings, assessment)
         return html
 
-    def _build_html(self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None) -> str:
+    def _build_html(
+        self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None
+    ) -> str:
         sections = []
         sections.append("<html><body>")
         sections.append("<h1>Security Assessment Report</h1>")
@@ -31,12 +35,16 @@ class PDFReportGenerator:
         low = [f for f in findings if f.get("severity") == "low"]
 
         sections.append("<h2>Summary</h2>")
-        sections.append(f"<p>Critical: {len(critical)} | High: {len(high)} | Medium: {len(medium)} | Low: {len(low)}</p>")
+        sections.append(
+            f"<p>Critical: {len(critical)} | High: {len(high)} | Medium: {len(medium)} | Low: {len(low)}</p>"
+        )
 
         for f in findings:
             sections.append("<div class='finding'>")
             sections.append(f"<h3>{f.get('title', 'Untitled')}</h3>")
-            sections.append(f"<p>Severity: {f.get('severity', 'none')} | Confidence: {f.get('confidence', 'low')} | Status: {f.get('status', 'open')}</p>")
+            sections.append(
+                f"<p>Severity: {f.get('severity', 'none')} | Confidence: {f.get('confidence', 'low')} | Status: {f.get('status', 'open')}</p>"
+            )
             sections.append(f"<p>Target: {f.get('target', 'N/A')}</p>")
             sections.append(f"<p>{f.get('description', '')}</p>")
             if f.get("remediation"):
@@ -50,7 +58,9 @@ class PDFReportGenerator:
 class MarkdownReportGenerator:
     """Generates Markdown reports from assessment findings."""
 
-    async def generate(self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None) -> str:
+    async def generate(
+        self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None
+    ) -> str:
         lines = []
 
         lines.append("# Security Assessment Report")

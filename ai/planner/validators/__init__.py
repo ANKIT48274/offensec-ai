@@ -8,7 +8,9 @@ from typing import Any
 class PlanValidator:
     """Validates assessment plans against scope and constraints."""
 
-    async def validate_scope(self, plan: list[dict[str, Any]], scope: dict[str, Any]) -> tuple[bool, list[str]]:
+    async def validate_scope(
+        self, plan: list[dict[str, Any]], scope: dict[str, Any]
+    ) -> tuple[bool, list[str]]:
         violations = []
         allowed_techniques = set(scope.get("techniques", []))
 

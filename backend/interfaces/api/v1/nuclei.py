@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Query
 
+from backend.application.services.nuclei_service import NucleiResultsService
 from backend.infrastructure.di import get_nuclei_service
 from backend.interfaces.api.responses import (
     error_response,
     paginated_response,
     success_response,
 )
-from backend.application.services.nuclei_service import NucleiResultsService
 
 router = APIRouter()
 
@@ -27,7 +27,9 @@ async def list_nuclei_results(
     nuclei_service: NucleiResultsService = Depends(get_nuclei_service),
 ) -> Any:
     try:
-        rows, total = await nuclei_service.list_by_project(project_id, page, page_size, severity, search)
+        rows, total = await nuclei_service.list_by_project(
+            project_id, page, page_size, severity, search
+        )
         return paginated_response(
             [_model_to_dict(r) for r in rows],
             total,

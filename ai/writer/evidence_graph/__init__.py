@@ -17,12 +17,14 @@ class EvidenceGraph:
             target = finding.get("target", "")
             node_id = finding.get("id", "")
 
-            nodes.append({
-                "id": node_id,
-                "type": "finding",
-                "label": finding.get("title", ""),
-                "severity": finding.get("severity", ""),
-            })
+            nodes.append(
+                {
+                    "id": node_id,
+                    "type": "finding",
+                    "label": finding.get("title", ""),
+                    "severity": finding.get("severity", ""),
+                }
+            )
 
             if target and target not in seen_targets:
                 seen_targets.add(target)

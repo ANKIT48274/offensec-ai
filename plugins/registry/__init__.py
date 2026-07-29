@@ -7,7 +7,15 @@ from typing import Any
 
 
 class PluginMetadata:
-    def __init__(self, name: str, version: str, description: str, author: str, capabilities: list[str], signature: str | None = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        version: str,
+        description: str,
+        author: str,
+        capabilities: list[str],
+        signature: str | None = None,
+    ) -> None:
         self.name = name
         self.version = version
         self.description = description

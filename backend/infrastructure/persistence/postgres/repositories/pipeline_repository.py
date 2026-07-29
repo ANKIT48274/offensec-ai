@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.application.dto import PipelineJobResponseDTO
 from backend.infrastructure.persistence.postgres.models import ScanJobModel
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class PipelineJobRepository:
@@ -49,7 +48,9 @@ class PipelineJobRepository:
         result = await self._session.execute(query)
         models = result.scalars().all()
 
-        count_query = select(func.count(ScanJobModel.id)).where(ScanJobModel.project_id == project_id)
+        count_query = select(func.count(ScanJobModel.id)).where(
+            ScanJobModel.project_id == project_id
+        )
         count_result = await self._session.execute(count_query)
         total = count_result.scalar() or 0
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Query
 
 from backend.infrastructure.di import get_asset_service
 from backend.interfaces.api.responses import (
@@ -26,7 +26,9 @@ async def list_assets(
     asset_service: Any = Depends(get_asset_service),
 ) -> Any:
     try:
-        assets, total = await asset_service.list_by_project(project_id, page, page_size, asset_type, search)
+        assets, total = await asset_service.list_by_project(
+            project_id, page, page_size, asset_type, search
+        )
         return paginated_response(assets, total, page, page_size)
     except Exception as e:
         return error_response(str(e), code="ASSET_LIST_ERROR")

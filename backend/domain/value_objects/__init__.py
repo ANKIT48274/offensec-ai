@@ -100,6 +100,7 @@ class IPAddress:
             ipaddress.ip_address(self.value)
         except ValueError as e:
             from backend.domain.exceptions import ValidationError
+
             raise ValidationError("IPAddress", str(e)) from e
 
     @property
@@ -120,6 +121,7 @@ class CIDR:
             ipaddress.ip_network(self.value, strict=False)
         except ValueError as e:
             from backend.domain.exceptions import ValidationError
+
             raise ValidationError("CIDR", str(e)) from e
 
     def contains(self, address: IPAddress) -> bool:
@@ -133,8 +135,11 @@ class Port:
 
     def __post_init__(self) -> None:
         from backend.domain.exceptions import ValidationError
+
         if not 1 <= self.number <= 65535:
-            raise ValidationError("Port", f"Port number must be between 1 and 65535, got {self.number}")
+            raise ValidationError(
+                "Port", f"Port number must be between 1 and 65535, got {self.number}"
+            )
         if self.protocol not in ("tcp", "udp"):
             raise ValidationError("Port", f"Protocol must be 'tcp' or 'udp', got '{self.protocol}'")
 
@@ -148,6 +153,7 @@ class Hostname:
 
     def __post_init__(self) -> None:
         from backend.domain.exceptions import ValidationError
+
         if not self.HOSTNAME_RE.match(self.value):
             raise ValidationError("Hostname", f"'{self.value}' is not a valid hostname")
 
@@ -159,17 +165,20 @@ class URL:
 
     def __post_init__(self) -> None:
         from backend.domain.exceptions import ValidationError
+
         if not self.URL_RE.match(self.value):
             raise ValidationError("URL", f"'{self.value}' is not a valid URL")
 
     @property
     def hostname(self) -> str:
         from urllib.parse import urlparse
+
         return urlparse(self.value).hostname or ""
 
     @property
     def path(self) -> str:
         from urllib.parse import urlparse
+
         return urlparse(self.value).path
 
 
@@ -183,6 +192,7 @@ class Service:
 
     def __post_init__(self) -> None:
         from backend.domain.exceptions import ValidationError
+
         if not self.name:
             raise ValidationError("Service", "Service name cannot be empty")
         if self.state not in ("open", "filtered", "closed"):
@@ -200,7 +210,10 @@ class Credential:
     def __post_init__(self) -> None:
         if not any([self.username, self.password, self.hash]):
             from backend.domain.exceptions import ValidationError
-            raise ValidationError("Credential", "At least one of username, password, or hash must be provided")
+
+            raise ValidationError(
+                "Credential", "At least one of username, password, or hash must be provided"
+            )
 
 
 @dataclass(frozen=True)

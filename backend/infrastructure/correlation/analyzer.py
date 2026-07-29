@@ -5,11 +5,31 @@ from __future__ import annotations
 from typing import Any
 
 WEAK_PROTOCOLS = {"ftp", "telnet", "rlogin", "rsh", "tftp"}
-HIGH_RISK_PORTS = {"23": "telnet", "21": "ftp", "445": "smb", "135": "rpc", "139": "netbios", "3389": "rdp"}
-OUTDATED_SIGNATURES = {"OpenSSH_7", "Apache/2.2", "Apache/2.4", "nginx/1.1.", "nginx/1.2.", "nginx/1.3.", "nginx/1.4."}
+HIGH_RISK_PORTS = {
+    "23": "telnet",
+    "21": "ftp",
+    "445": "smb",
+    "135": "rpc",
+    "139": "netbios",
+    "3389": "rdp",
+}
+OUTDATED_SIGNATURES = {
+    "OpenSSH_7",
+    "Apache/2.2",
+    "Apache/2.4",
+    "nginx/1.1.",
+    "nginx/1.2.",
+    "nginx/1.3.",
+    "nginx/1.4.",
+}
 
 
-def correlate(assets: list[dict[str, Any]], nuclei: list[dict[str, Any]], scans: list[dict[str, Any]], httpx_data: list[dict[str, Any]]) -> dict[str, Any]:
+def correlate(
+    assets: list[dict[str, Any]],
+    nuclei: list[dict[str, Any]],
+    scans: list[dict[str, Any]],
+    httpx_data: list[dict[str, Any]],
+) -> dict[str, Any]:
     analysis: dict[str, Any] = {
         "executive_summary": "",
         "attack_surface": _analyze_attack_surface(assets),
@@ -46,12 +66,16 @@ def correlate(assets: list[dict[str, Any]], nuclei: list[dict[str, Any]], scans:
 
     analysis["risk_score"] = min(score, 100)
 
-    analysis["executive_summary"] = _build_summary(analysis["risk_score"], assets, nuclei, outdated, tech_stack)
+    analysis["executive_summary"] = _build_summary(
+        analysis["risk_score"], assets, nuclei, outdated, tech_stack
+    )
 
     return analysis
 
 
-def _build_summary(risk_score: int, assets: list, nuclei: list, outdated: list, tech_stack: list) -> str:
+def _build_summary(
+    risk_score: int, assets: list, nuclei: list, outdated: list, tech_stack: list
+) -> str:
     parts = []
     if risk_score >= 70:
         parts.append("High-risk environment identified.")
@@ -65,12 +89,16 @@ def _build_summary(risk_score: int, assets: list, nuclei: list, outdated: list, 
     parts.append(f"Assessment covered {host_count} assets and identified {vuln_count} findings.")
 
     if outdated:
-        names = ", ".join(set(o["name"] for o in outdated[:3]))
+        names = ", ".join({o["name"] for o in outdated[:3]})
         parts.append(f"Outdated software detected: {names}.")
 
-    high_ports = sum(1 for a in assets for p in (a.get("ports") or []) if str(p.get("port")) in HIGH_RISK_PORTS)
+    high_ports = sum(
+        1 for a in assets for p in (a.get("ports") or []) if str(p.get("port")) in HIGH_RISK_PORTS
+    )
     if high_ports:
-        parts.append(f"{high_ports} high-risk services exposed ({', '.join(HIGH_RISK_PORTS[str(p.get('port'))] for a in assets for p in (a.get('ports') or []) if str(p.get('port')) in HIGH_RISK_PORTS)}).")
+        parts.append(
+            f"{high_ports} high-risk services exposed ({', '.join(HIGH_RISK_PORTS[str(p.get('port'))] for a in assets for p in (a.get('ports') or []) if str(p.get('port')) in HIGH_RISK_PORTS)})."
+        )
 
     if tech_stack:
         parts.append(f"Technology stack includes {', '.join(tech_stack[:4])}.")
@@ -81,7 +109,12 @@ def _build_summary(risk_score: int, assets: list, nuclei: list, outdated: list, 
 def _analyze_attack_surface(assets: list) -> dict:
     total_hosts = len(assets)
     total_ports = sum(len(a.get("ports") or []) for a in assets)
-    open_ports = sum(1 for a in assets for p in (a.get("ports") or []) if "open" in str(p.get("state", "")).lower())
+    open_ports = sum(
+        1
+        for a in assets
+        for p in (a.get("ports") or [])
+        if "open" in str(p.get("state", "")).lower()
+    )
 
     score = 10
     if total_hosts > 5:
@@ -90,24 +123,46 @@ def _analyze_attack_surface(assets: list) -> dict:
         score += 10
     if open_ports > 10:
         score += 10
-    high = sum(1 for a in assets for p in (a.get("ports") or []) if str(p.get("port")) in HIGH_RISK_PORTS)
+    high = sum(
+        1 for a in assets for p in (a.get("ports") or []) if str(p.get("port")) in HIGH_RISK_PORTS
+    )
     score += high * 5
 
-    return {"total_hosts": total_hosts, "total_ports": total_ports, "open_ports": open_ports, "high_risk_ports": high, "score": min(score, 100)}
+    return {
+        "total_hosts": total_hosts,
+        "total_ports": total_ports,
+        "open_ports": open_ports,
+        "high_risk_ports": high,
+        "score": min(score, 100),
+    }
 
 
 def _find_critical_assets(assets: list, nuclei: list) -> list:
-    critical_ids = set(n.get("matched_url", n.get("target", "")) for n in nuclei if n.get("severity") == "critical")
+    critical_ids = {
+        n.get("matched_url", n.get("target", "")) for n in nuclei if n.get("severity") == "critical"
+    }
 
     critical = []
     for a in assets:
         val = a.get("value", "")
         if val in critical_ids:
-            critical.append({"value": val, "type": a.get("asset_type", "unknown"), "reason": "Critical vulnerability found"})
+            critical.append(
+                {
+                    "value": val,
+                    "type": a.get("asset_type", "unknown"),
+                    "reason": "Critical vulnerability found",
+                }
+            )
             continue
-        for p in (a.get("ports") or []):
+        for p in a.get("ports") or []:
             if str(p.get("port")) in HIGH_RISK_PORTS:
-                critical.append({"value": val, "type": a.get("asset_type", "unknown"), "reason": f"High-risk port {p.get('port')}/{p.get('protocol')} exposed"})
+                critical.append(
+                    {
+                        "value": val,
+                        "type": a.get("asset_type", "unknown"),
+                        "reason": f"High-risk port {p.get('port')}/{p.get('protocol')} exposed",
+                    }
+                )
                 break
 
     return critical
@@ -119,13 +174,23 @@ def _rank_risks(nuclei: list, assets: list) -> list:
 
     risks = []
     for n in sorted_nuc[:10]:
-        score = 90 if n.get("severity") == "critical" else 70 if n.get("severity") == "high" else 50 if n.get("severity") == "medium" else 20
-        risks.append({
-            "title": n.get("template_name", n.get("template_id", "Unknown")),
-            "severity": n.get("severity"),
-            "target": n.get("matched_url", n.get("target", "")),
-            "score": score,
-        })
+        score = (
+            90
+            if n.get("severity") == "critical"
+            else 70
+            if n.get("severity") == "high"
+            else 50
+            if n.get("severity") == "medium"
+            else 20
+        )
+        risks.append(
+            {
+                "title": n.get("template_name", n.get("template_id", "Unknown")),
+                "severity": n.get("severity"),
+                "target": n.get("matched_url", n.get("target", "")),
+                "score": score,
+            }
+        )
     return risks
 
 
@@ -133,13 +198,15 @@ def _build_attack_paths(assets: list, nuclei: list) -> list:
     paths = []
     for n in nuclei:
         if n.get("severity") in ("critical", "high"):
-            paths.append({
-                "source": "external",
-                "destination": n.get("matched_url", n.get("target", "")),
-                "technique": n.get("template_id", "Unknown"),
-                "score": 85 if n.get("severity") == "critical" else 60,
-                "evidence": [n.get("template_name", ""), n.get("description", "")][:2],
-            })
+            paths.append(
+                {
+                    "source": "external",
+                    "destination": n.get("matched_url", n.get("target", "")),
+                    "technique": n.get("template_id", "Unknown"),
+                    "score": 85 if n.get("severity") == "critical" else 60,
+                    "evidence": [n.get("template_name", ""), n.get("description", "")][:2],
+                }
+            )
     return paths
 
 
@@ -147,7 +214,7 @@ def _extract_tech_stack(assets: list) -> list:
     seen = set()
     stack = []
     for a in assets:
-        for t in (a.get("technologies") or []):
+        for t in a.get("technologies") or []:
             if t not in seen:
                 seen.add(t)
                 stack.append(t)
@@ -160,21 +227,29 @@ def _detect_outdated(assets: list, httpx_data: list) -> list:
         server = (h.get("server") or "").lower()
         for sig in OUTDATED_SIGNATURES:
             if server.startswith(sig.lower()):
-                outdated.append({"name": h.get("server", "unknown"), "version": h.get("server", ""), "target": h.get("url", "")})
+                outdated.append(
+                    {
+                        "name": h.get("server", "unknown"),
+                        "version": h.get("server", ""),
+                        "target": h.get("url", ""),
+                    }
+                )
                 break
     for a in assets:
-        for p in (a.get("ports") or []):
+        for p in a.get("ports") or []:
             svc = str(p.get("service", ""))
             for sig in OUTDATED_SIGNATURES:
                 if svc.lower().startswith(sig.lower()):
-                    outdated.append({"name": svc, "version": svc, "target": str(a.get("value", ""))})
+                    outdated.append(
+                        {"name": svc, "version": svc, "target": str(a.get("value", ""))}
+                    )
     return outdated[:5]
 
 
 def _detect_weak_protocols(assets: list) -> list:
     weak = []
     for a in assets:
-        for p in (a.get("ports") or []):
+        for p in a.get("ports") or []:
             svc = (p.get("service") or "").lower()
             if svc in WEAK_PROTOCOLS:
                 weak.append(f"{svc} on {a.get('value', '')}:{p.get('port')}")
@@ -184,8 +259,10 @@ def _detect_weak_protocols(assets: list) -> list:
 def _detect_exposed_services(assets: list) -> list:
     exposed = []
     for a in assets:
-        for p in (a.get("ports") or []):
+        for p in a.get("ports") or []:
             port = str(p.get("port"))
             if port in HIGH_RISK_PORTS:
-                exposed.append({"service": HIGH_RISK_PORTS[port], "port": port, "host": a.get("value", "")})
+                exposed.append(
+                    {"service": HIGH_RISK_PORTS[port], "port": port, "host": a.get("value", "")}
+                )
     return exposed

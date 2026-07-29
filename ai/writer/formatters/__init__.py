@@ -41,5 +41,6 @@ class JSONFormatter(ReportFormatter):
 
     def format(self, content: str, findings: list[dict[str, Any]]) -> str:
         import json
+
         data = {"findings": findings, "summary": {"total": len(findings)}}
         return json.dumps(data, indent=2)

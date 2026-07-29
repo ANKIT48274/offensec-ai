@@ -36,10 +36,13 @@ class PipelineService:
             httpx_data = result.get("httpx", {})
 
             if nmap_data and not nmap_data.get("error"):
-                job.complete_step(0, {
-                    "hosts": nmap_data.get("data", {}).get("hosts", []),
-                    "scan_info": nmap_data.get("data", {}).get("scan_info", {}),
-                })
+                job.complete_step(
+                    0,
+                    {
+                        "hosts": nmap_data.get("data", {}).get("hosts", []),
+                        "scan_info": nmap_data.get("data", {}).get("scan_info", {}),
+                    },
+                )
             else:
                 job.fail_step(0, nmap_data.get("error", "Nmap step failed"))
                 return await self._repo.update(job_data.id, job.to_dict())
@@ -67,27 +70,29 @@ class PipelineService:
             if nuclei_findings:
                 db_entries = []
                 for f in nuclei_findings:
-                    db_entries.append({
-                        "id": __import__("uuid").uuid4().hex,
-                        "job_id": job_data.id,
-                        "project_id": dto.project_id,
-                        "target": f.get("target", dto.target.strip()),
-                        "template_id": f.get("template_id", "unknown"),
-                        "template_name": f.get("template_name"),
-                        "severity": f.get("severity", "unknown"),
-                        "matched_url": f.get("matched_url"),
-                        "matched_at": f.get("matched_at"),
-                        "protocol": f.get("protocol"),
-                        "tags": f.get("tags", []),
-                        "ref_url": f.get("reference"),
-                        "cwe_ids": f.get("cwe", []),
-                        "cve_ids": f.get("cve", []),
-                        "cvss_score": f.get("cvss_score"),
-                        "description": f.get("description"),
-                        "remediation": f.get("remediation"),
-                        "extracted_results": f.get("extracted_results", []),
-                        "raw_data": f,
-                    })
+                    db_entries.append(
+                        {
+                            "id": __import__("uuid").uuid4().hex,
+                            "job_id": job_data.id,
+                            "project_id": dto.project_id,
+                            "target": f.get("target", dto.target.strip()),
+                            "template_id": f.get("template_id", "unknown"),
+                            "template_name": f.get("template_name"),
+                            "severity": f.get("severity", "unknown"),
+                            "matched_url": f.get("matched_url"),
+                            "matched_at": f.get("matched_at"),
+                            "protocol": f.get("protocol"),
+                            "tags": f.get("tags", []),
+                            "ref_url": f.get("reference"),
+                            "cwe_ids": f.get("cwe", []),
+                            "cve_ids": f.get("cve", []),
+                            "cvss_score": f.get("cvss_score"),
+                            "description": f.get("description"),
+                            "remediation": f.get("remediation"),
+                            "extracted_results": f.get("extracted_results", []),
+                            "raw_data": f,
+                        }
+                    )
                 await self._nuclei_repo.bulk_create(db_entries)
 
             job.complete_step(2, {"count": len(nuclei_findings)})

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from backend.application.dto import ScanCreateDTO, ScanResponseDTO
 from backend.domain.entities.scan import Scan
 from backend.infrastructure.persistence.postgres.repositories.scan_repository import (

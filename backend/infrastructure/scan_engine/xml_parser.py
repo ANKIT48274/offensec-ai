@@ -63,18 +63,18 @@ def _parse_host(host: ET.Element) -> dict[str, Any] | None:
         }
 
     for addr in host.findall("address"):
-        if addr.get("addrtype") == "ipv4":
-            host_data["ips"].append(addr.get("addr", ""))
-        elif addr.get("addrtype") == "ipv6":
+        if addr.get("addrtype") == "ipv4" or addr.get("addrtype") == "ipv6":
             host_data["ips"].append(addr.get("addr", ""))
         elif addr.get("addrtype") == "mac":
             host_data["mac"] = addr.get("addr", "")
 
     for hostname in host.findall("hostnames/hostname"):
-        host_data["hostnames"].append({
-            "name": hostname.get("name", ""),
-            "type": hostname.get("type", ""),
-        })
+        host_data["hostnames"].append(
+            {
+                "name": hostname.get("name", ""),
+                "type": hostname.get("type", ""),
+            }
+        )
 
     for port in host.findall("ports/port"):
         port_data = _parse_port(port)
@@ -82,27 +82,33 @@ def _parse_host(host: ET.Element) -> dict[str, Any] | None:
             host_data["ports"].append(port_data)
 
     for os_match in host.findall("os/osmatch"):
-        host_data["os_matches"].append({
-            "name": os_match.get("name", ""),
-            "accuracy": os_match.get("accuracy", ""),
-            "line": os_match.get("line", ""),
-        })
+        host_data["os_matches"].append(
+            {
+                "name": os_match.get("name", ""),
+                "accuracy": os_match.get("accuracy", ""),
+                "line": os_match.get("line", ""),
+            }
+        )
 
     for os_guess in host.findall("os/osclass"):
-        host_data["os_guesses"].append({
-            "vendor": os_guess.get("vendor", ""),
-            "os_family": os_guess.get("osfamily", ""),
-            "os_gen": os_guess.get("osgen", ""),
-            "accuracy": os_guess.get("accuracy", ""),
-            "type": os_guess.get("type", ""),
-        })
+        host_data["os_guesses"].append(
+            {
+                "vendor": os_guess.get("vendor", ""),
+                "os_family": os_guess.get("osfamily", ""),
+                "os_gen": os_guess.get("osgen", ""),
+                "accuracy": os_guess.get("accuracy", ""),
+                "type": os_guess.get("type", ""),
+            }
+        )
 
     for script in host.findall("hostscript/script"):
-        host_data["scripts"].append({
-            "id": script.get("id", ""),
-            "output": script.get("output", ""),
-            "table": _parse_script_tables(script),
-        })
+        host_data["scripts"].append(
+            {
+                "id": script.get("id", ""),
+                "output": script.get("output", ""),
+                "table": _parse_script_tables(script),
+            }
+        )
 
     return host_data
 
@@ -138,10 +144,12 @@ def _parse_port(port: ET.Element) -> dict[str, Any] | None:
     for script in port.findall("script"):
         if "scripts" not in port_data:
             port_data["scripts"] = []
-        port_data["scripts"].append({
-            "id": script.get("id", ""),
-            "output": script.get("output", ""),
-        })
+        port_data["scripts"].append(
+            {
+                "id": script.get("id", ""),
+                "output": script.get("output", ""),
+            }
+        )
 
     return port_data
 

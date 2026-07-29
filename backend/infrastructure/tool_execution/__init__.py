@@ -27,14 +27,39 @@ class ToolExecutor:
 
     def _default_allowed_tools(self) -> list[str]:
         return [
-            "nmap", "masscan", "ffuf", "gobuster", "dirb",
-            "nikto", "sqlmap", "hydra", "john", "hashcat",
-            "curl", "wget", "dig", "nslookup", "whois",
-            "sslscan", "testssl", "enum4linux", "smbclient",
-            "ldapsearch", "crackmapexec", "bloodhound-python",
-            "dnsrecon", "dnsenum", "wpscan", "joomscan",
-            "whatweb", "wafw00f", "jq", "grep", "awk",
-            "python3", "msfconsole",
+            "nmap",
+            "masscan",
+            "ffuf",
+            "gobuster",
+            "dirb",
+            "nikto",
+            "sqlmap",
+            "hydra",
+            "john",
+            "hashcat",
+            "curl",
+            "wget",
+            "dig",
+            "nslookup",
+            "whois",
+            "sslscan",
+            "testssl",
+            "enum4linux",
+            "smbclient",
+            "ldapsearch",
+            "crackmapexec",
+            "bloodhound-python",
+            "dnsrecon",
+            "dnsenum",
+            "wpscan",
+            "joomscan",
+            "whatweb",
+            "wafw00f",
+            "jq",
+            "grep",
+            "awk",
+            "python3",
+            "msfconsole",
         ]
 
     async def execute(
@@ -59,9 +84,7 @@ class ToolExecutor:
             )
 
             try:
-                stdout, stderr = await asyncio.wait_for(
-                    proc.communicate(), timeout=timeout
-                )
+                stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
             except TimeoutError:
                 proc.kill()
                 await proc.wait()

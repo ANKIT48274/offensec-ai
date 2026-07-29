@@ -5,14 +5,12 @@ from __future__ import annotations
 import asyncio
 import ipaddress
 import os
-import re
 import tempfile
 from typing import Any
 
 from backend.infrastructure.pipeline.httpx_parser import parse_httpx_json
 from backend.infrastructure.scan_engine.runner import _is_valid_target, _terminate_gracefully
 from backend.infrastructure.scan_engine.xml_parser import parse_nmap_xml
-
 
 NMAP_TIMEOUT = 300
 HTTPX_TIMEOUT = 300
@@ -69,7 +67,7 @@ async def _run_nmap_step(target: str) -> dict[str, Any]:
         )
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=NMAP_TIMEOUT)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await _terminate_gracefully(proc)
             _cleanup(xml_path)
             return {"error": f"Nmap timed out after {NMAP_TIMEOUT}s"}
@@ -79,7 +77,7 @@ async def _run_nmap_step(target: str) -> dict[str, Any]:
             _cleanup(xml_path)
             return {"error": f"Nmap failed (exit {proc.returncode}): {err}"}
 
-        with open(xml_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(xml_path, encoding="utf-8", errors="replace") as f:
             xml_content = f.read()
 
         _cleanup(xml_path)
@@ -132,11 +130,21 @@ async def _run_httpx_step(targets: list[str]) -> dict[str, Any]:
     os.close(fd)
 
     cmd = [
-        "httpx", "-json", "-o", out_path,
-        "-title", "-tech-detect", "-status-code", "-server",
-        "-content-length", "-web-server", "-websocket",
-        "-tls-grab", "-favicon",
-    ] + list(targets[:20])
+        "httpx",
+        "-json",
+        "-o",
+        out_path,
+        "-title",
+        "-tech-detect",
+        "-status-code",
+        "-server",
+        "-content-length",
+        "-web-server",
+        "-websocket",
+        "-tls-grab",
+        "-favicon",
+        *list(targets[:20]),
+    ]
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -146,7 +154,7 @@ async def _run_httpx_step(targets: list[str]) -> dict[str, Any]:
         )
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=HTTPX_TIMEOUT)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await _terminate_gracefully(proc)
             _cleanup(out_path)
             return {"error": f"HTTPX timed out after {HTTPX_TIMEOUT}s"}
@@ -156,11 +164,13 @@ async def _run_httpx_step(targets: list[str]) -> dict[str, Any]:
         if not os.path.exists(out_path) or os.path.getsize(out_path) == 0:
             if proc.returncode != 0 and proc.returncode is not None:
                 _cleanup(out_path)
-                return {"error": f"HTTPX failed (exit {proc.returncode}): {err_text or 'unknown error'}"}
+                return {
+                    "error": f"HTTPX failed (exit {proc.returncode}): {err_text or 'unknown error'}"
+                }
             _cleanup(out_path)
             return {"data": [], "error": None}
 
-        with open(out_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(out_path, encoding="utf-8", errors="replace") as f:
             raw = f.read()
 
         _cleanup(out_path)

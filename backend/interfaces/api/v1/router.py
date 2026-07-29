@@ -5,17 +5,17 @@ from fastapi import APIRouter
 from backend.interfaces.api.v1.ai import router as ai_router
 from backend.interfaces.api.v1.ai_analysis import router as ai_analysis_router
 from backend.interfaces.api.v1.assessments import router as assessments_router
+from backend.interfaces.api.v1.assets import router as assets_router
 from backend.interfaces.api.v1.auth import router as auth_router
+from backend.interfaces.api.v1.dashboard import router as dashboard_router
+from backend.interfaces.api.v1.evidence import router as evidence_router
 from backend.interfaces.api.v1.findings import router as findings_router
+from backend.interfaces.api.v1.nuclei import router as nuclei_router
+from backend.interfaces.api.v1.pipeline import router as pipeline_router
 from backend.interfaces.api.v1.plugins import router as plugins_router
 from backend.interfaces.api.v1.projects import router as projects_router
 from backend.interfaces.api.v1.reports import router as reports_router
 from backend.interfaces.api.v1.scans import router as scans_router
-from backend.interfaces.api.v1.pipeline import router as pipeline_router
-from backend.interfaces.api.v1.nuclei import router as nuclei_router
-from backend.interfaces.api.v1.assets import router as assets_router
-from backend.interfaces.api.v1.dashboard import router as dashboard_router
-from backend.interfaces.api.v1.evidence import router as evidence_router
 from backend.interfaces.api.v1.users import router as users_router
 
 api_v1_router = APIRouter()

@@ -16,7 +16,9 @@ def create_parser() -> argparse.ArgumentParser:
     scan_parser = subparsers.add_parser("scan", help="Run a quick scan")
     scan_parser.add_argument("target", type=str, help="Target IP or hostname")
     scan_parser.add_argument("--ports", type=str, default="top-1000", help="Ports to scan")
-    scan_parser.add_argument("--output", type=str, default="text", choices=["text", "json"], help="Output format")
+    scan_parser.add_argument(
+        "--output", type=str, default="text", choices=["text", "json"], help="Output format"
+    )
 
     return parser
 

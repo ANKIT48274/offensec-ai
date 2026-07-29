@@ -43,7 +43,9 @@ class UserRepository:
         return self._to_dto(model) if model else None
 
     async def get_by_username(self, username: str) -> UserResponseDTO | None:
-        result = await self._session.execute(select(UserModel).where(UserModel.username == username))
+        result = await self._session.execute(
+            select(UserModel).where(UserModel.username == username)
+        )
         model = result.scalar_one_or_none()
         return self._to_dto(model) if model else None
 
@@ -58,7 +60,12 @@ class UserRepository:
 
         return PaginatedResponseDTO(
             data=[self._to_dto(m) for m in models],
-            pagination=PaginationDTO(page=page, page_size=page_size, total=total, total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0),
+            pagination=PaginationDTO(
+                page=page,
+                page_size=page_size,
+                total=total,
+                total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0,
+            ),
         )
 
     async def update(self, user_id: str, data: dict[str, Any]) -> UserResponseDTO:
@@ -122,7 +129,12 @@ class ProjectRepository:
 
         return PaginatedResponseDTO(
             data=[self._to_dto(m) for m in models],
-            pagination=PaginationDTO(page=page, page_size=page_size, total=total, total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0),
+            pagination=PaginationDTO(
+                page=page,
+                page_size=page_size,
+                total=total,
+                total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0,
+            ),
         )
 
     async def update(self, project_id: str, data: dict[str, Any]) -> ProjectResponseDTO:
@@ -168,7 +180,9 @@ class AssessmentRepository:
         result = await self._session.get(AssessmentModel, assessment_id)
         return self._to_dto(result) if result else None
 
-    async def list_by_project(self, project_id: str, page: int, page_size: int) -> PaginatedResponseDTO:
+    async def list_by_project(
+        self, project_id: str, page: int, page_size: int
+    ) -> PaginatedResponseDTO:
         query = (
             select(AssessmentModel)
             .where(AssessmentModel.project_id == project_id)
@@ -178,13 +192,20 @@ class AssessmentRepository:
         result = await self._session.execute(query)
         models = result.scalars().all()
 
-        count_query = select(func.count(AssessmentModel.id)).where(AssessmentModel.project_id == project_id)
+        count_query = select(func.count(AssessmentModel.id)).where(
+            AssessmentModel.project_id == project_id
+        )
         count_result = await self._session.execute(count_query)
         total = count_result.scalar() or 0
 
         return PaginatedResponseDTO(
             data=[self._to_dto(m) for m in models],
-            pagination=PaginationDTO(page=page, page_size=page_size, total=total, total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0),
+            pagination=PaginationDTO(
+                page=page,
+                page_size=page_size,
+                total=total,
+                total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0,
+            ),
         )
 
     async def update(self, assessment_id: str, data: dict[str, Any]) -> AssessmentResponseDTO:
@@ -235,7 +256,9 @@ class FindingRepository:
         result = await self._session.get(FindingModel, finding_id)
         return self._to_dto(result) if result else None
 
-    async def list_by_assessment(self, assessment_id: str, page: int, page_size: int) -> PaginatedResponseDTO:
+    async def list_by_assessment(
+        self, assessment_id: str, page: int, page_size: int
+    ) -> PaginatedResponseDTO:
         query = (
             select(FindingModel)
             .where(FindingModel.assessment_id == assessment_id)
@@ -246,13 +269,20 @@ class FindingRepository:
         result = await self._session.execute(query)
         models = result.scalars().all()
 
-        count_query = select(func.count(FindingModel.id)).where(FindingModel.assessment_id == assessment_id)
+        count_query = select(func.count(FindingModel.id)).where(
+            FindingModel.assessment_id == assessment_id
+        )
         count_result = await self._session.execute(count_query)
         total = count_result.scalar() or 0
 
         return PaginatedResponseDTO(
             data=[self._to_dto(m) for m in models],
-            pagination=PaginationDTO(page=page, page_size=page_size, total=total, total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0),
+            pagination=PaginationDTO(
+                page=page,
+                page_size=page_size,
+                total=total,
+                total_pages=(total + page_size - 1) // page_size if page_size > 0 else 0,
+            ),
         )
 
     async def update(self, finding_id: str, data: dict[str, Any]) -> FindingResponseDTO:

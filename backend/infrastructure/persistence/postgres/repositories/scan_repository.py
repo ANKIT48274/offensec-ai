@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.application.dto import ScanResponseDTO
 from backend.infrastructure.persistence.postgres.models import ScanModel
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class ScanRepository:
@@ -36,7 +35,9 @@ class ScanRepository:
         await self._session.refresh(model)
         return self._to_dto(model)
 
-    async def list_by_project(self, project_id: str, page: int, page_size: int) -> tuple[list[ScanResponseDTO], int]:
+    async def list_by_project(
+        self, project_id: str, page: int, page_size: int
+    ) -> tuple[list[ScanResponseDTO], int]:
         query = (
             select(ScanModel)
             .where(ScanModel.project_id == project_id)

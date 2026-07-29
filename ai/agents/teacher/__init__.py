@@ -40,7 +40,9 @@ class TeacherAgent:
                 "and lateral movement via WinRM, SMB, or scheduled tasks."
             ),
         }
-        return explanations.get(technique.lower(), f"Technique '{technique}' explanation is not available.")
+        return explanations.get(
+            technique.lower(), f"Technique '{technique}' explanation is not available."
+        )
 
     async def assess_skill(self, actions: list[dict[str, Any]]) -> dict[str, Any]:
         return {
@@ -50,6 +52,8 @@ class TeacherAgent:
             "recommended_topics": [],
         }
 
-    async def recommend_next_steps(self, completed_steps: list[str], available_techniques: list[str]) -> list[str]:
+    async def recommend_next_steps(
+        self, completed_steps: list[str], available_techniques: list[str]
+    ) -> list[str]:
         recommendations = [t for t in available_techniques if t not in completed_steps]
         return recommendations[:3]

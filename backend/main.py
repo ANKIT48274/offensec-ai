@@ -64,7 +64,15 @@ class _NoopEventBus:
 
 
 class _NoopAuditLogger:
-    async def log(self, actor_id: str, action: str, resource_type: str, resource_id: str, details: dict | None = None, ip_address: str | None = None) -> None:
+    async def log(
+        self,
+        actor_id: str,
+        action: str,
+        resource_type: str,
+        resource_id: str,
+        details: dict | None = None,
+        ip_address: str | None = None,
+    ) -> None:
         pass
 
 

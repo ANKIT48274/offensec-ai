@@ -15,11 +15,13 @@ class PlanScheduler:
         for phase in phases:
             for technique in phase.get("techniques", []):
                 order += 1
-                schedule.append({
-                    "order": order,
-                    "phase": phase.get("phase", ""),
-                    "technique": technique,
-                    "status": "pending",
-                })
+                schedule.append(
+                    {
+                        "order": order,
+                        "phase": phase.get("phase", ""),
+                        "technique": technique,
+                        "status": "pending",
+                    }
+                )
 
         return schedule

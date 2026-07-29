@@ -35,16 +35,19 @@ async def login(
 ) -> Any:
     try:
         access_token, refresh_token, user_id = await user_service.authenticate(
-            body.email, body.password,
+            body.email,
+            body.password,
             ip=request.client.host if request.client else None,
         )
-        return success_response({
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "user_id": user_id,
-            "token_type": "bearer",
-            "expires_in": 3600,
-        })
+        return success_response(
+            {
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "user_id": user_id,
+                "token_type": "bearer",
+                "expires_in": 3600,
+            }
+        )
     except Exception as e:
         return error_response(f"Authentication failed: {e}", code="AUTHENTICATION_ERROR")
 

@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select, func, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from backend.infrastructure.persistence.postgres.models import NucleiResultModel
+from sqlalchemy import func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class NucleiResultRepository:
@@ -28,16 +27,24 @@ class NucleiResultRepository:
 
     async def list_by_job(self, job_id: str) -> list[NucleiResultModel]:
         result = await self._session.execute(
-            select(NucleiResultModel).where(NucleiResultModel.job_id == job_id)
+            select(NucleiResultModel)
+            .where(NucleiResultModel.job_id == job_id)
             .order_by(NucleiResultModel.created_at.desc())
         )
         return list(result.scalars().all())
 
     async def list_by_project(
-        self, project_id: str, page: int, page_size: int, severity: str | None = None, search: str | None = None
+        self,
+        project_id: str,
+        page: int,
+        page_size: int,
+        severity: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[NucleiResultModel], int]:
         query = select(NucleiResultModel).where(NucleiResultModel.project_id == project_id)
-        count_query = select(func.count(NucleiResultModel.id)).where(NucleiResultModel.project_id == project_id)
+        count_query = select(func.count(NucleiResultModel.id)).where(
+            NucleiResultModel.project_id == project_id
+        )
 
         if severity and severity != "all":
             query = query.where(NucleiResultModel.severity == severity)
@@ -62,7 +69,11 @@ class NucleiResultRepository:
                 )
             )
 
-        query = query.order_by(NucleiResultModel.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        query = (
+            query.order_by(NucleiResultModel.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+        )
         result = await self._session.execute(query)
         models = list(result.scalars().all())
 
@@ -75,8 +86,9 @@ class NucleiResultRepository:
         counts: dict[str, int] = {}
         for sev in ("critical", "high", "medium", "low", "info"):
             result = await self._session.execute(
-                select(func.count(NucleiResultModel.id))
-                .where(NucleiResultModel.project_id == project_id, NucleiResultModel.severity == sev)
+                select(func.count(NucleiResultModel.id)).where(
+                    NucleiResultModel.project_id == project_id, NucleiResultModel.severity == sev
+                )
             )
             counts[sev] = result.scalar() or 0
         return counts

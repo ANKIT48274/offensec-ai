@@ -11,7 +11,9 @@ class ReportWriterAgent:
     def __init__(self, model_client: Any) -> None:
         self._client = model_client
 
-    async def generate_report(self, findings: list[dict[str, Any]], context: dict[str, Any] | None = None) -> str:
+    async def generate_report(
+        self, findings: list[dict[str, Any]], context: dict[str, Any] | None = None
+    ) -> str:
         lines = []
         lines.append("# Security Assessment Report")
         lines.append("")
@@ -23,7 +25,9 @@ class ReportWriterAgent:
 
         lines.append("## Summary")
         lines.append(f"Total findings: {len(findings)}")
-        lines.append(f"Critical: {len(critical)}, High: {len(high)}, Medium: {len(medium)}, Low: {len(low)}")
+        lines.append(
+            f"Critical: {len(critical)}, High: {len(high)}, Medium: {len(medium)}, Low: {len(low)}"
+        )
         lines.append("")
 
         for idx, finding in enumerate(findings, 1):

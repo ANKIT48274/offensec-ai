@@ -2,8 +2,21 @@
 
 WEB_SIGNATURES = {
     "sql_injection": {
-        "patterns": ["' OR '1'='1", "' UNION SELECT", "'; DROP TABLE", "' WAITFOR DELAY", "1' AND 1=1--", "1' AND 1=2--"],
-        "indicators": ["sql syntax error", "odbc driver", "mysql_fetch", "ora-", "unclosed quotation mark"],
+        "patterns": [
+            "' OR '1'='1",
+            "' UNION SELECT",
+            "'; DROP TABLE",
+            "' WAITFOR DELAY",
+            "1' AND 1=1--",
+            "1' AND 1=2--",
+        ],
+        "indicators": [
+            "sql syntax error",
+            "odbc driver",
+            "mysql_fetch",
+            "ora-",
+            "unclosed quotation mark",
+        ],
         "severity": "critical",
     },
     "cross_site_scripting": {

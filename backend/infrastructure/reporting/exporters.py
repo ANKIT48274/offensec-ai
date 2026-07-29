@@ -11,30 +11,44 @@ from typing import Any
 def export_csv(findings: list[dict[str, Any]]) -> str:
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow([
-        "Title", "Severity", "Confidence", "Status", "Target", "CWE", "CVSS",
-        "Description", "Remediation", "Created",
-    ])
+    writer.writerow(
+        [
+            "Title",
+            "Severity",
+            "Confidence",
+            "Status",
+            "Target",
+            "CWE",
+            "CVSS",
+            "Description",
+            "Remediation",
+            "Created",
+        ]
+    )
     for f in findings:
-        writer.writerow([
-            f.get("title", ""),
-            f.get("severity", ""),
-            f.get("confidence", ""),
-            f.get("status", ""),
-            f.get("target", ""),
-            f.get("cwe_id", ""),
-            f.get("cvss_score", ""),
-            f.get("description", ""),
-            f.get("remediation", ""),
-            f.get("created_at", ""),
-        ])
+        writer.writerow(
+            [
+                f.get("title", ""),
+                f.get("severity", ""),
+                f.get("confidence", ""),
+                f.get("status", ""),
+                f.get("target", ""),
+                f.get("cwe_id", ""),
+                f.get("cvss_score", ""),
+                f.get("description", ""),
+                f.get("remediation", ""),
+                f.get("created_at", ""),
+            ]
+        )
     return output.getvalue()
 
 
 def export_json(findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None) -> str:
     output: dict[str, Any] = {
         "report": {
-            "generated_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+            "generated_at": __import__("datetime")
+            .datetime.now(__import__("datetime").timezone.utc)
+            .isoformat(),
             "tool": "OffenSec AI",
         },
         "summary": {

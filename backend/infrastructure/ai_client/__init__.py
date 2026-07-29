@@ -84,7 +84,9 @@ class OpenAICompatibleClient(BaseAIClient):
             headers={"Authorization": f"Bearer {self._api_key}"},
         )
 
-    async def _chat_completion(self, messages: list[dict[str, str]], response_format: dict[str, Any] | None = None) -> dict[str, Any]:
+    async def _chat_completion(
+        self, messages: list[dict[str, str]], response_format: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         body: dict[str, Any] = {
             "model": self._model,
             "messages": messages,
@@ -99,7 +101,10 @@ class OpenAICompatibleClient(BaseAIClient):
 
     async def generate_plan(self, context: dict[str, Any]) -> dict[str, Any]:
         messages = [
-            {"role": "system", "content": "You are a penetration testing planning assistant. Generate a structured assessment plan."},
+            {
+                "role": "system",
+                "content": "You are a penetration testing planning assistant. Generate a structured assessment plan.",
+            },
             {"role": "user", "content": str(context)},
         ]
         result = await self._chat_completion(messages)
@@ -107,7 +112,10 @@ class OpenAICompatibleClient(BaseAIClient):
 
     async def analyze_finding(self, evidence: list[dict[str, Any]]) -> dict[str, Any]:
         messages = [
-            {"role": "system", "content": "Analyze the following security evidence and produce structured findings."},
+            {
+                "role": "system",
+                "content": "Analyze the following security evidence and produce structured findings.",
+            },
             {"role": "user", "content": str(evidence)},
         ]
         result = await self._chat_completion(messages)
@@ -115,7 +123,10 @@ class OpenAICompatibleClient(BaseAIClient):
 
     async def generate_report(self, data: dict[str, Any]) -> str:
         messages = [
-            {"role": "system", "content": "Generate a professional penetration testing report from the provided findings."},
+            {
+                "role": "system",
+                "content": "Generate a professional penetration testing report from the provided findings.",
+            },
             {"role": "user", "content": str(data)},
         ]
         result = await self._chat_completion(messages)
@@ -123,7 +134,10 @@ class OpenAICompatibleClient(BaseAIClient):
 
     async def explain(self, topic: str, context: dict[str, Any]) -> str:
         messages = [
-            {"role": "system", "content": "You are a security education assistant. Explain the following topic in context."},
+            {
+                "role": "system",
+                "content": "You are a security education assistant. Explain the following topic in context.",
+            },
             {"role": "user", "content": f"Topic: {topic}\nContext: {context}"},
         ]
         result = await self._chat_completion(messages)

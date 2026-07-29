@@ -14,51 +14,49 @@ from backend.application.services import (
     ProjectService,
     UserService,
 )
+from backend.application.services.asset_service import AssetService
+from backend.application.services.correlation_service import CorrelationService
+from backend.application.services.nuclei_service import NucleiResultsService
+from backend.application.services.pipeline_service import PipelineService
+from backend.application.services.scan_service import ScanService
 from backend.infrastructure.persistence.postgres.repositories import (
     AssessmentRepository,
     FindingRepository,
     ProjectRepository,
     UserRepository,
 )
-from backend.infrastructure.persistence.redis import RedisCache, TokenBlacklist
-from backend.infrastructure.reporting import MarkdownReportGenerator
-
-
-from backend.application.services.asset_service import AssetService
-from backend.application.services.correlation_service import CorrelationService
-from backend.application.services.nuclei_service import NucleiResultsService
-from backend.application.services.scan_service import ScanService
-from backend.application.services.pipeline_service import PipelineService
 from backend.infrastructure.persistence.postgres.repositories.asset_repository import (
     AssetRepository,
 )
 from backend.infrastructure.persistence.postgres.repositories.evidence_repository import (
     EvidenceRepository,
 )
-from backend.infrastructure.persistence.postgres.repositories.scan_repository import (
-    ScanRepository,
+from backend.infrastructure.persistence.postgres.repositories.nuclei_repository import (
+    NucleiResultRepository,
 )
 from backend.infrastructure.persistence.postgres.repositories.pipeline_repository import (
     PipelineJobRepository,
 )
-from backend.infrastructure.persistence.postgres.repositories.nuclei_repository import (
-    NucleiResultRepository,
+from backend.infrastructure.persistence.postgres.repositories.scan_repository import (
+    ScanRepository,
 )
+from backend.infrastructure.persistence.redis import RedisCache, TokenBlacklist
+from backend.infrastructure.reporting import MarkdownReportGenerator
 
 __all__ = [
-    "get_user_service",
-    "get_project_service",
+    "get_ai_client",
     "get_assessment_service",
+    "get_asset_service",
+    "get_cache",
+    "get_correlation_service",
     "get_finding_service",
+    "get_nuclei_service",
+    "get_pipeline_service",
+    "get_project_service",
     "get_report_generator_service",
     "get_scan_service",
-    "get_pipeline_service",
-    "get_nuclei_service",
-    "get_asset_service",
-    "get_correlation_service",
-    "get_ai_client",
-    "get_cache",
     "get_token_blacklist",
+    "get_user_service",
 ]
 
 
@@ -161,6 +159,7 @@ async def get_report_generator_service(
     request: Request = None,
 ) -> Any:
     from backend.application.use_cases import GenerateReportUseCase
+
     repo = FindingRepository(session)
     finding_service = FindingService(
         finding_repo=repo,

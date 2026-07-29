@@ -90,7 +90,9 @@ class Assessment:
 
         if self.status not in (AssessmentStatus.DRAFT, AssessmentStatus.PAUSED):
             raise AssessmentStateError(
-                self.id, self.status.value, f"{AssessmentStatus.DRAFT.value} or {AssessmentStatus.PAUSED.value}"
+                self.id,
+                self.status.value,
+                f"{AssessmentStatus.DRAFT.value} or {AssessmentStatus.PAUSED.value}",
             )
         self.status = AssessmentStatus.IN_PROGRESS
         self.started_at = datetime.now(UTC)
@@ -100,7 +102,9 @@ class Assessment:
         from backend.domain.exceptions import AssessmentStateError
 
         if self.status != AssessmentStatus.IN_PROGRESS:
-            raise AssessmentStateError(self.id, self.status.value, AssessmentStatus.IN_PROGRESS.value)
+            raise AssessmentStateError(
+                self.id, self.status.value, AssessmentStatus.IN_PROGRESS.value
+            )
         self.status = AssessmentStatus.COMPLETED
         self.completed_at = datetime.now(UTC)
         self.updated_at = datetime.now(UTC)
@@ -109,7 +113,9 @@ class Assessment:
         from backend.domain.exceptions import AssessmentStateError
 
         if self.status != AssessmentStatus.IN_PROGRESS:
-            raise AssessmentStateError(self.id, self.status.value, AssessmentStatus.IN_PROGRESS.value)
+            raise AssessmentStateError(
+                self.id, self.status.value, AssessmentStatus.IN_PROGRESS.value
+            )
         self.status = AssessmentStatus.PAUSED
         self.updated_at = datetime.now(UTC)
 

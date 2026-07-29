@@ -14,11 +14,13 @@ class PipelineJob:
     project_id: str = ""
     target: str = ""
     status: str = "pending"
-    steps: list[dict[str, Any]] = field(default_factory=lambda: [
-        {"name": "nmap", "status": "pending"},
-        {"name": "httpx", "status": "pending"},
-        {"name": "nuclei", "status": "pending"},
-    ])
+    steps: list[dict[str, Any]] = field(
+        default_factory=lambda: [
+            {"name": "nmap", "status": "pending"},
+            {"name": "httpx", "status": "pending"},
+            {"name": "nuclei", "status": "pending"},
+        ]
+    )
     results: dict[str, Any] = field(default_factory=dict)
     error_message: str | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))

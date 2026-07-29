@@ -7,12 +7,14 @@ from typing import Any
 
 class ModelProvider:
     name: str = ""
+
     async def complete(self, prompt: str, options: dict[str, Any] | None = None) -> str:
         raise NotImplementedError
 
 
 class LocalModelProvider(ModelProvider):
     name = "local"
+
     async def complete(self, prompt: str, options: dict[str, Any] | None = None) -> str:
         return ""
 
@@ -22,6 +24,7 @@ class LocalModelProvider(ModelProvider):
 
 class OpenAIProvider(ModelProvider):
     name = "openai"
+
     async def complete(self, prompt: str, options: dict[str, Any] | None = None) -> str:
         return ""
 
@@ -31,6 +34,7 @@ class OpenAIProvider(ModelProvider):
 
 class AnthropicProvider(ModelProvider):
     name = "anthropic"
+
     async def complete(self, prompt: str, options: dict[str, Any] | None = None) -> str:
         return ""
 

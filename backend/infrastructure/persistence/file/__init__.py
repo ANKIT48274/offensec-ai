@@ -70,4 +70,5 @@ def delete_evidence(assessment_id: str, finding_id: str) -> None:
     directory = Path(EVIDENCE_BASE_DIR) / assessment_id / finding_id
     if directory.exists():
         import shutil
+
         shutil.rmtree(directory)

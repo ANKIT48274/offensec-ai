@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import tempfile
-from datetime import UTC, datetime
 from typing import Any
 
 from backend.infrastructure.reporting.templates import (
@@ -37,11 +36,14 @@ class PDFReportGenerator:
         template_fn = style_map.get(style, technical_template)
         html = template_fn(findings, assessment)
 
-        fd, pdf_path = tempfile.mkstemp(suffix=".pdf", prefix=f"report_{style}_", dir=self._output_dir)
+        fd, pdf_path = tempfile.mkstemp(
+            suffix=".pdf", prefix=f"report_{style}_", dir=self._output_dir
+        )
         os.close(fd)
 
         try:
             from weasyprint import HTML as WeasyHTML
+
             WeasyHTML(string=html).write_pdf(pdf_path)
         except ImportError:
             html_path = pdf_path.replace(".pdf", ".html")
@@ -51,7 +53,12 @@ class PDFReportGenerator:
 
         return pdf_path
 
-    async def generate_html(self, findings: list[dict[str, Any]], assessment: dict[str, Any] | None = None, style: str = "technical") -> str:
+    async def generate_html(
+        self,
+        findings: list[dict[str, Any]],
+        assessment: dict[str, Any] | None = None,
+        style: str = "technical",
+    ) -> str:
         style_map = {
             "executive": executive_template,
             "technical": technical_template,

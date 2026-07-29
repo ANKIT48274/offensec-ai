@@ -68,6 +68,7 @@ class UserService:
         existing = await self._user_repo.get_by_email(dto.email)
         if existing:
             from backend.domain.exceptions import EntityAlreadyExistsError
+
             raise EntityAlreadyExistsError("User", dto.email)
 
         password_hash = self._password_hasher.hash(dto.password)
@@ -87,10 +88,13 @@ class UserService:
         user = await self._user_repo.get_by_id(user_id)
         if not user:
             from backend.domain.exceptions import EntityNotFoundError
+
             raise EntityNotFoundError("User", user_id)
         return user
 
-    async def authenticate(self, email: str, password: str, ip: str | None = None) -> tuple[str, str]:
+    async def authenticate(
+        self, email: str, password: str, ip: str | None = None
+    ) -> tuple[str, str]:
         user = await self._user_repo.get_by_email(email)
         if not user:
             raise AuthorizationError("unknown", "login", f"user {email}")
@@ -124,7 +128,9 @@ class ProjectService:
     async def create(self, dto: ProjectCreateDTO, owner_id: str) -> ProjectResponseDTO:
         project = Project(name=dto.name, description=dto.description, owner_id=owner_id)
         result = await self._project_repo.create(project.to_dict())
-        await self._event_bus.publish(ProjectCreated(project_id=result.id, name=result.name, owner_id=owner_id))
+        await self._event_bus.publish(
+            ProjectCreated(project_id=result.id, name=result.name, owner_id=owner_id)
+        )
         return result
 
     async def get_by_id(self, project_id: str, user_id: str) -> ProjectResponseDTO:
@@ -138,7 +144,9 @@ class ProjectService:
     async def list_by_user(self, user_id: str, page: int, page_size: int) -> PaginatedResponseDTO:
         return await self._project_repo.list_by_owner(user_id, page, page_size)
 
-    async def update(self, project_id: str, dto: ProjectUpdateDTO, user_id: str) -> ProjectResponseDTO:
+    async def update(
+        self, project_id: str, dto: ProjectUpdateDTO, user_id: str
+    ) -> ProjectResponseDTO:
         existing = await self._project_repo.get_by_id(project_id)
         if not existing:
             raise EntityNotFoundError("Project", project_id)
@@ -185,7 +193,9 @@ class AssessmentService:
             raise EntityNotFoundError("Assessment", assessment_id)
         return assessment
 
-    async def list_by_project(self, project_id: str, page: int, page_size: int) -> PaginatedResponseDTO:
+    async def list_by_project(
+        self, project_id: str, page: int, page_size: int
+    ) -> PaginatedResponseDTO:
         return await self._assessment_repo.list_by_project(project_id, page, page_size)
 
     async def start(self, assessment_id: str, user_id: str) -> AssessmentResponseDTO:
@@ -203,7 +213,12 @@ class AssessmentService:
         domain.start()
         result = await self._assessment_repo.update(assessment_id, domain.to_dict())
         await self._event_bus.publish(
-            AssessmentStarted(assessment_id=assessment_id, project_id=assessment.project_id, scope_id="", started_by=user_id)
+            AssessmentStarted(
+                assessment_id=assessment_id,
+                project_id=assessment.project_id,
+                scope_id="",
+                started_by=user_id,
+            )
         )
         return result
 
@@ -222,7 +237,12 @@ class AssessmentService:
         domain.complete()
         result = await self._assessment_repo.update(assessment_id, domain.to_dict())
         await self._event_bus.publish(
-            AssessmentCompleted(assessment_id=assessment_id, project_id=assessment.project_id, finding_count=0, critical_count=0)
+            AssessmentCompleted(
+                assessment_id=assessment_id,
+                project_id=assessment.project_id,
+                finding_count=0,
+                critical_count=0,
+            )
         )
         return result
 
@@ -277,5 +297,7 @@ class FindingService:
             raise EntityNotFoundError("Finding", finding_id)
         return finding
 
-    async def list_by_assessment(self, assessment_id: str, page: int, page_size: int) -> PaginatedResponseDTO:
+    async def list_by_assessment(
+        self, assessment_id: str, page: int, page_size: int
+    ) -> PaginatedResponseDTO:
         return await self._finding_repo.list_by_assessment(assessment_id, page, page_size)

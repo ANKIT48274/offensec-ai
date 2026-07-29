@@ -10,7 +10,6 @@ from typing import Any
 
 from backend.infrastructure.scan_engine.xml_parser import parse_nmap_xml
 
-
 NMAP_TIMEOUT = 600
 NMAP_BASE_ARGS = ["-Pn", "-sV", "-sC", "-O", "-oX"]
 MAX_STDERR_BYTES = 65536
@@ -20,7 +19,7 @@ async def _terminate_gracefully(proc: asyncio.subprocess.Process, timeout: float
     try:
         proc.terminate()
         await asyncio.wait_for(proc.wait(), timeout=timeout)
-    except asyncio.TimeoutError:
+    except TimeoutError:
         proc.kill()
         await proc.wait()
 
@@ -46,7 +45,7 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
 
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await _terminate_gracefully(proc)
             _cleanup_file(xml_path)
             raise TimeoutError(f"Nmap scan timed out after {timeout}s for target: {target}")
@@ -54,9 +53,11 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
         if proc.returncode != 0:
             error_msg = stderr.decode("utf-8", errors="replace")[:MAX_STDERR_BYTES].strip()
             _cleanup_file(xml_path)
-            raise RuntimeError(f"Nmap failed (exit {proc.returncode}): {error_msg or 'Unknown error'}")
+            raise RuntimeError(
+                f"Nmap failed (exit {proc.returncode}): {error_msg or 'Unknown error'}"
+            )
 
-        with open(xml_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(xml_path, encoding="utf-8", errors="replace") as f:
             xml_content = f.read()
 
         if not xml_content.strip():
@@ -84,6 +85,7 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
 
 def _is_valid_target(target: str) -> bool:
     import ipaddress
+
     try:
         ipaddress.ip_address(target)
         return True
@@ -95,10 +97,11 @@ def _is_valid_target(target: str) -> bool:
     except ValueError:
         pass
     import re
-    hostname_re = re.compile(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)*(?:[a-zA-Z]{2,63})$")
-    if hostname_re.match(target):
-        return True
-    return False
+
+    hostname_re = re.compile(
+        r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)*(?:[a-zA-Z]{2,63})$"
+    )
+    return bool(hostname_re.match(target))
 
 
 def _cleanup_file(path: str) -> None:

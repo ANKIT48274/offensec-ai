@@ -10,9 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.infrastructure.correlation.analyzer import correlate
 from backend.infrastructure.persistence.postgres.models import (
+    AICorrelationModel,
     AssetModel,
     AttackPathModel,
-    AICorrelationModel,
     NucleiResultModel,
 )
 
@@ -39,7 +39,7 @@ class CorrelationService:
             severity=_severity_from_score(result.get("risk_score", 0)),
             risk_score=result.get("risk_score", 0),
             assets=[a.get("value", "") for a in assets],
-            findings=[r for r in result.get("top_risks", [])],
+            findings=list(result.get("top_risks", [])),
             attack_paths=result.get("attack_paths", []),
             recommendations=result.get("recommendations", []),
             raw_analysis=result,
@@ -65,8 +65,10 @@ class CorrelationService:
 
     async def get_report(self, project_id: str) -> dict[str, Any] | None:
         result = await self._session.execute(
-            select(AICorrelationModel).where(AICorrelationModel.project_id == project_id)
-            .order_by(AICorrelationModel.created_at.desc()).limit(1)
+            select(AICorrelationModel)
+            .where(AICorrelationModel.project_id == project_id)
+            .order_by(AICorrelationModel.created_at.desc())
+            .limit(1)
         )
         model = result.scalar_one_or_none()
         if not model:
@@ -87,7 +89,8 @@ class CorrelationService:
 
     async def get_attack_paths(self, project_id: str) -> list[dict[str, Any]]:
         result = await self._session.execute(
-            select(AttackPathModel).where(AttackPathModel.project_id == project_id)
+            select(AttackPathModel)
+            .where(AttackPathModel.project_id == project_id)
             .order_by(AttackPathModel.score.desc())
         )
         return [
@@ -103,15 +106,19 @@ class CorrelationService:
         ]
 
     async def _get_assets(self, project_id: str) -> list[dict[str, Any]]:
-        result = await self._session.execute(select(AssetModel).where(AssetModel.project_id == project_id))
+        result = await self._session.execute(
+            select(AssetModel).where(AssetModel.project_id == project_id)
+        )
         return [_asset_dict(m) for m in result.scalars().all()]
 
     async def _get_nuclei(self, project_id: str) -> list[dict[str, Any]]:
         if not hasattr(NucleiResultModel, "__tablename__"):
             return []
         result = await self._session.execute(
-            select(NucleiResultModel).where(NucleiResultModel.project_id == project_id)
-            .order_by(NucleiResultModel.created_at.desc()).limit(100)
+            select(NucleiResultModel)
+            .where(NucleiResultModel.project_id == project_id)
+            .order_by(NucleiResultModel.created_at.desc())
+            .limit(100)
         )
         return [
             {

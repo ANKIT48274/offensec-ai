@@ -5,7 +5,17 @@ EVIDENCE_SCHEMA = {
     "properties": {
         "id": {"type": "string"},
         "finding_id": {"type": "string"},
-        "type": {"type": "string", "enum": ["screenshot", "command_output", "log_entry", "network_capture", "file_sample", "manual_note"]},
+        "type": {
+            "type": "string",
+            "enum": [
+                "screenshot",
+                "command_output",
+                "log_entry",
+                "network_capture",
+                "file_sample",
+                "manual_note",
+            ],
+        },
         "source": {"type": "string"},
         "content": {"type": "string"},
         "file_path": {"type": ["string", "null"]},
@@ -24,7 +34,17 @@ FINDING_SCHEMA = {
         "description": {"type": "string"},
         "severity": {"type": "string", "enum": ["none", "low", "medium", "high", "critical"]},
         "confidence": {"type": "string", "enum": ["low", "medium", "high", "confirmed"]},
-        "status": {"type": "string", "enum": ["open", "in_review", "confirmed", "false_positive", "accepted_risk", "remediated"]},
+        "status": {
+            "type": "string",
+            "enum": [
+                "open",
+                "in_review",
+                "confirmed",
+                "false_positive",
+                "accepted_risk",
+                "remediated",
+            ],
+        },
         "target": {"type": "string"},
         "evidence": {"type": "array", "items": {"$ref": "#/definitions/Evidence"}},
         "cwe_id": {"type": ["string", "null"]},

@@ -14,7 +14,9 @@ from starlette.types import ASGIApp
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Logs all incoming requests and their response times."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         request_id = uuid.uuid4().hex[:12]
         request.state.request_id = request_id
         request.state.start_time = time.time()
@@ -31,7 +33,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 class ScopeEnforcementMiddleware(BaseHTTPMiddleware):
     """Enforces scope boundaries on all target-modifying operations."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
         return response
 
@@ -39,7 +43,9 @@ class ScopeEnforcementMiddleware(BaseHTTPMiddleware):
 class AuditMiddleware(BaseHTTPMiddleware):
     """Records auditable actions to the audit log."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         response = await call_next(request)
         return response
 

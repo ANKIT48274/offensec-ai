@@ -19,7 +19,9 @@ class UserModel(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
     last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     projects = relationship("ProjectModel", back_populates="owner", cascade="all, delete-orphan")
@@ -34,15 +36,23 @@ class ProjectModel(Base):
     owner_id = Column(String(64), ForeignKey("users.id"), nullable=False)
     is_archived = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     owner = relationship("UserModel", back_populates="projects")
-    assessments = relationship("AssessmentModel", back_populates="project", cascade="all, delete-orphan")
+    assessments = relationship(
+        "AssessmentModel", back_populates="project", cascade="all, delete-orphan"
+    )
     scans = relationship("ScanModel", back_populates="project", cascade="all, delete-orphan")
     scan_jobs = relationship("ScanJobModel", back_populates="project", cascade="all, delete-orphan")
     assets = relationship("AssetModel", back_populates="project", cascade="all, delete-orphan")
-    ai_analyses = relationship("AICorrelationModel", back_populates="project", cascade="all, delete-orphan")
-    attack_paths = relationship("AttackPathModel", back_populates="project", cascade="all, delete-orphan")
+    ai_analyses = relationship(
+        "AICorrelationModel", back_populates="project", cascade="all, delete-orphan"
+    )
+    attack_paths = relationship(
+        "AttackPathModel", back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class AssessmentModel(Base):
@@ -57,13 +67,19 @@ class AssessmentModel(Base):
     started_at = Column(DateTime(timezone=True), nullable=True)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     project = relationship("ProjectModel", back_populates="assessments")
-    findings = relationship("FindingModel", back_populates="assessment", cascade="all, delete-orphan")
+    findings = relationship(
+        "FindingModel", back_populates="assessment", cascade="all, delete-orphan"
+    )
     targets = relationship("TargetModel", back_populates="assessment", cascade="all, delete-orphan")
     reports = relationship("ReportModel", back_populates="assessment", cascade="all, delete-orphan")
-    ai_plans = relationship("AIPlanModel", back_populates="assessment", cascade="all, delete-orphan")
+    ai_plans = relationship(
+        "AIPlanModel", back_populates="assessment", cascade="all, delete-orphan"
+    )
 
 
 class TargetModel(Base):
@@ -100,10 +116,14 @@ class FindingModel(Base):
     remediation = Column(Text, nullable=True)
     created_by = Column(String(64), default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     assessment = relationship("AssessmentModel", back_populates="findings")
-    evidences = relationship("EvidenceModel", back_populates="finding", cascade="all, delete-orphan")
+    evidences = relationship(
+        "EvidenceModel", back_populates="finding", cascade="all, delete-orphan"
+    )
 
 
 class EvidenceModel(Base):
@@ -178,7 +198,9 @@ class PluginModel(Base):
     is_enabled = Column(Boolean, default=False)
     signature = Column(String(512), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
 
 class ScanModel(Base):
@@ -194,7 +216,9 @@ class ScanModel(Base):
     json_result = Column(JSONB, nullable=True)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     project = relationship("ProjectModel", back_populates="scans")
 
@@ -210,10 +234,14 @@ class ScanJobModel(Base):
     results = Column(JSONB, default=dict)
     error_message = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     project = relationship("ProjectModel", back_populates="scan_jobs")
-    nuclei_results = relationship("NucleiResultModel", back_populates="job", cascade="all, delete-orphan")
+    nuclei_results = relationship(
+        "NucleiResultModel", back_populates="job", cascade="all, delete-orphan"
+    )
 
 
 class AssetModel(Base):
@@ -235,7 +263,9 @@ class AssetModel(Base):
     scan_count = Column(Integer, default=1)
     asset_meta = Column("metadata", JSONB, default=dict)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
 
     project = relationship("ProjectModel", back_populates="assets")
 
