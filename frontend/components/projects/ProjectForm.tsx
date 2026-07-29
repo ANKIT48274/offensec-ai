@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+function getUserId(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem("user_id") || "";
+}
+
 export function ProjectForm() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -18,7 +23,10 @@ export function ProjectForm() {
     try {
       const res = await fetch("/api/v1/projects", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": getUserId(),
+        },
         body: JSON.stringify({ name, description }),
       });
 

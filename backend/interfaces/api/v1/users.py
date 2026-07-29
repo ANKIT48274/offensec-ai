@@ -21,7 +21,7 @@ async def get_user(
         user = await user_service._user_repo.get_by_id(user_id)
         if not user:
             return error_response("User not found", code="NOT_FOUND")
-        return success_response(user.model_dump())
+        return success_response(user.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="USER_ERROR")
 
@@ -33,4 +33,4 @@ async def list_users(
     user_service: Any = Depends(get_user_service),
 ) -> Any:
     result = await user_service._user_repo.list(page, page_size)
-    return paginated_response(result.data, result.pagination.total, page, page_size)
+    return paginated_response([d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size)

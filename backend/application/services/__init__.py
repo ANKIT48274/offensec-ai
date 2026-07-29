@@ -100,7 +100,7 @@ class UserService:
             resource_id=user.id,
             ip_address=ip,
         )
-        return access, refresh
+        return access, refresh, user.id
 
 
 class ProjectService:

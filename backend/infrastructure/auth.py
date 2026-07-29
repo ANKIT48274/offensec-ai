@@ -14,7 +14,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
 def get_jwt_secret() -> str:
-    return os.environ.get("JWT_SECRET", "")
+    return os.environ.get("JWT_SECRET", "offensec-ai-default-jwt-secret-min-32-bytes!!")
 
 
 def get_jwt_algorithm() -> str:

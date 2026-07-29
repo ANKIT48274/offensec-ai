@@ -26,7 +26,7 @@ async def create_assessment(
 ) -> Any:
     try:
         assessment = await assessment_service.create(body, x_user_id)
-        return created_response(assessment.model_dump())
+        return created_response(assessment.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="ASSESSMENT_CREATE_ERROR")
 
@@ -39,7 +39,7 @@ async def list_assessments(
     assessment_service: Any = Depends(get_assessment_service),
 ) -> Any:
     result = await assessment_service.list_by_project(project_id, page, page_size)
-    return paginated_response(result.data, result.pagination.total, page, page_size)
+    return paginated_response([d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size)
 
 
 @router.get("/{assessment_id}")
@@ -50,7 +50,7 @@ async def get_assessment(
 ) -> Any:
     try:
         assessment = await assessment_service.get_by_id(assessment_id, x_user_id)
-        return success_response(assessment.model_dump())
+        return success_response(assessment.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="ASSESSMENT_GET_ERROR")
 
@@ -63,7 +63,7 @@ async def start_assessment(
 ) -> Any:
     try:
         assessment = await assessment_service.start(assessment_id, x_user_id)
-        return success_response(assessment.model_dump())
+        return success_response(assessment.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="ASSESSMENT_START_ERROR")
 
@@ -76,6 +76,6 @@ async def complete_assessment(
 ) -> Any:
     try:
         assessment = await assessment_service.complete(assessment_id, x_user_id)
-        return success_response(assessment.model_dump())
+        return success_response(assessment.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="ASSESSMENT_COMPLETE_ERROR")

@@ -15,7 +15,7 @@ from backend.infrastructure.ai_client import create_ai_client
 from backend.infrastructure.auth import JWTService
 from backend.infrastructure.logging import configure_logging, get_logger
 from backend.infrastructure.password_hasher import BcryptHasher
-from backend.infrastructure.persistence.postgres import create_session_factory
+from backend.infrastructure.persistence.postgres import create_session_factory, init_models
 from backend.infrastructure.persistence.redis import create_redis_client
 from backend.interfaces.api.middleware import register_middleware
 from backend.interfaces.api.responses import health_response
@@ -33,16 +33,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.db_session_factory = factory
     app.state.redis = await create_redis_client()
 
+    try:
+        await init_models()
+        logger.info("Database tables initialized")
+    except Exception as e:
+        logger.warning("Database init skipped (connect to PostgreSQL first): %s", e)
+
     app.state.password_hasher = BcryptHasher()
     app.state.token_service = JWTService()
     app.state.ai_client = create_ai_client()
 
     app.state.event_bus = _create_noop_event_bus()
     app.state.audit_logger = _create_noop_audit_logger()
-    app.state.user_repo = None
-    app.state.project_repo = None
-    app.state.assessment_repo = None
-    app.state.finding_repo = None
     app.state.scope_validator = None
     app.state.cache = None
 

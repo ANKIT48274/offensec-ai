@@ -37,11 +37,12 @@ class User:
             "id": self.id,
             "email": self.email,
             "username": self.username,
+            "password_hash": self.password_hash,
             "is_active": self.is_active,
             "is_superuser": self.is_superuser,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "last_login_at": self.last_login_at,
         }
 
 
@@ -64,8 +65,8 @@ class Project:
             "description": self.description,
             "owner_id": self.owner_id,
             "is_archived": self.is_archived,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
 
@@ -120,10 +121,10 @@ class Assessment:
             "status": self.status.value,
             "scope": self.scope.__dict__ if self.scope else None,
             "started_by": self.started_by,
-            "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
 
@@ -147,7 +148,7 @@ class Target:
             "type": self.type,
             "label": self.label,
             "metadata": self.metadata,
-            "discovered_at": self.discovered_at.isoformat(),
+            "discovered_at": self.discovered_at,
         }
 
 
@@ -192,8 +193,8 @@ class Finding:
             "attack_paths": self.attack_paths,
             "remediation": self.remediation,
             "created_by": self.created_by,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
 
@@ -219,7 +220,7 @@ class Evidence:
             "content": self.content[:1000] if self.content else "",
             "file_path": self.file_path,
             "metadata": self.metadata,
-            "captured_at": self.captured_at.isoformat(),
+            "captured_at": self.captured_at,
         }
 
 
@@ -246,7 +247,7 @@ class Report:
             "finding_count": self.finding_count,
             "critical_count": self.critical_count,
             "generated_by": self.generated_by,
-            "generated_at": self.generated_at.isoformat(),
+            "generated_at": self.generated_at,
         }
 
 
@@ -274,7 +275,7 @@ class AIPlan:
             "confidence_score": self.confidence_score,
             "approved": self.approved,
             "approved_by": self.approved_by,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at,
         }
 
 

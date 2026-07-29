@@ -9,6 +9,8 @@ from backend.interfaces.api.v1.findings import router as findings_router
 from backend.interfaces.api.v1.plugins import router as plugins_router
 from backend.interfaces.api.v1.projects import router as projects_router
 from backend.interfaces.api.v1.reports import router as reports_router
+from backend.interfaces.api.v1.scans import router as scans_router
+from backend.interfaces.api.v1.pipeline import router as pipeline_router
 from backend.interfaces.api.v1.users import router as users_router
 
 api_v1_router = APIRouter()
@@ -21,3 +23,5 @@ api_v1_router.include_router(findings_router, prefix="/findings", tags=["Finding
 api_v1_router.include_router(reports_router, prefix="/reports", tags=["Reports"])
 api_v1_router.include_router(ai_router, prefix="/ai", tags=["AI"])
 api_v1_router.include_router(plugins_router, prefix="/plugins", tags=["Plugins"])
+api_v1_router.include_router(scans_router, prefix="/scans", tags=["Scans"])
+api_v1_router.include_router(pipeline_router, prefix="/pipeline", tags=["Pipeline"])

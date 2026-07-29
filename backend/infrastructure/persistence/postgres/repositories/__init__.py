@@ -82,6 +82,7 @@ class UserRepository:
             id=model.id,
             email=model.email,
             username=model.username,
+            password_hash=model.password_hash,
             is_active=model.is_active,
             is_superuser=model.is_superuser,
             created_at=model.created_at,

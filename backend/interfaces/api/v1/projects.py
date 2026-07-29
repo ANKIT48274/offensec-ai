@@ -21,25 +21,30 @@ router = APIRouter()
 @router.post("")
 async def create_project(
     body: ProjectCreateDTO,
-    x_user_id: str = Header(""),
+    x_user_id: str | None = Header(default=None),
     project_service: Any = Depends(get_project_service),
 ) -> Any:
     try:
         project = await project_service.create(body, x_user_id)
-        return created_response(project.model_dump())
+        return created_response(project.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="PROJECT_CREATE_ERROR")
 
 
 @router.get("")
 async def list_projects(
-    x_user_id: str = Header(""),
+    x_user_id: str | None = Header(default=None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
     project_service: Any = Depends(get_project_service),
 ) -> Any:
-    result = await project_service.list_by_user(x_user_id, page, page_size)
-    return paginated_response(result.data, result.pagination.total, page, page_size)
+    result = await project_service.list_by_user(x_user_id or "", page, page_size)
+    return paginated_response(
+        [d.model_dump(mode="json") for d in result.data],
+        result.pagination.total,
+        page,
+        page_size,
+    )
 
 
 @router.get("/{project_id}")
@@ -50,7 +55,7 @@ async def get_project(
 ) -> Any:
     try:
         project = await project_service.get_by_id(project_id, x_user_id)
-        return success_response(project.model_dump())
+        return success_response(project.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="PROJECT_GET_ERROR")
 
@@ -64,7 +69,7 @@ async def update_project(
 ) -> Any:
     try:
         project = await project_service.update(project_id, body, x_user_id)
-        return success_response(project.model_dump())
+        return success_response(project.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="PROJECT_UPDATE_ERROR")
 

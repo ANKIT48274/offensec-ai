@@ -30,6 +30,7 @@ class UserResponseDTO(BaseModel):
     id: str
     email: str
     username: str
+    password_hash: str = ""
     is_active: bool
     is_superuser: bool
     created_at: datetime
@@ -165,6 +166,68 @@ class AIPlanResponseDTO(BaseModel):
     reasoning: str
     confidence_score: float
     approved: bool
+    created_at: datetime
+
+
+class ScanCreateDTO(BaseModel):
+    """DTO for starting a new scan."""
+
+    project_id: str = Field(..., min_length=1)
+    target: str = Field(..., min_length=1, max_length=255)
+
+
+class ScanResponseDTO(BaseModel):
+    """DTO for scan data returned to clients."""
+
+    id: str
+    project_id: str
+    target: str
+    status: str
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    xml_path: str | None = None
+    json_result: dict[str, Any] | None = None
+    error_message: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PipelineStartDTO(BaseModel):
+    """DTO for starting a pipeline scan."""
+
+    project_id: str = Field(..., min_length=1)
+    target: str = Field(..., min_length=1, max_length=255)
+
+
+class PipelineJobResponseDTO(BaseModel):
+    """DTO for pipeline job data returned to clients."""
+
+    id: str
+    project_id: str
+    target: str
+    status: str
+    steps: list[dict[str, Any]]
+    results: dict[str, Any]
+    error_message: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class HttpxResultDTO(BaseModel):
+    """DTO for HTTPX result."""
+
+    id: str
+    job_id: str
+    url: str
+    status_code: int | None = None
+    title: str | None = None
+    tech: list[str] = Field(default_factory=list)
+    server: str | None = None
+    content_length: int | None = None
+    redirect_url: str | None = None
+    websocket: str | None = None
+    tls_data: dict[str, Any] | None = None
+    favicon_hash: str | None = None
     created_at: datetime
 
 

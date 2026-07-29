@@ -38,6 +38,8 @@ class ProjectModel(Base):
 
     owner = relationship("UserModel", back_populates="projects")
     assessments = relationship("AssessmentModel", back_populates="project", cascade="all, delete-orphan")
+    scans = relationship("ScanModel", back_populates="project", cascade="all, delete-orphan")
+    scan_jobs = relationship("ScanJobModel", back_populates="project", cascade="all, delete-orphan")
 
 
 class AssessmentModel(Base):
@@ -69,7 +71,7 @@ class TargetModel(Base):
     value = Column(String(255), nullable=False)
     type = Column(String(32), nullable=False)
     label = Column(String(255), default="")
-    metadata = Column(JSONB, default=dict)
+    target_meta = Column("metadata", JSONB, default=dict)
     discovered_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     assessment = relationship("AssessmentModel", back_populates="targets")
@@ -86,7 +88,7 @@ class FindingModel(Base):
     confidence = Column(String(16), default="medium", nullable=False)
     status = Column(String(32), default="open", nullable=False)
     target = Column(String(255), default="")
-    evidence = Column(JSONB, default=list)
+    evidence_data = Column("evidence", JSONB, default=list)
     references_data = Column("references", JSONB, default=list)
     owasp_id = Column(String(32), nullable=True)
     cwe_id = Column(String(32), nullable=True)
@@ -110,7 +112,7 @@ class EvidenceModel(Base):
     source = Column(String(255), nullable=False)
     content = Column(Text, default="")
     file_path = Column(String(500), nullable=True)
-    metadata = Column(JSONB, default=dict)
+    evidence_meta = Column("metadata", JSONB, default=dict)
     captured_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     finding = relationship("FindingModel", back_populates="evidences")
@@ -174,3 +176,55 @@ class PluginModel(Base):
     signature = Column(String(512), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+class ScanModel(Base):
+    __tablename__ = "scans"
+
+    id = Column(String(64), primary_key=True)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    target = Column(String(255), nullable=False)
+    status = Column(String(32), default="pending", nullable=False)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    xml_path = Column(String(500), nullable=True)
+    json_result = Column(JSONB, nullable=True)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    project = relationship("ProjectModel", back_populates="scans")
+
+
+class ScanJobModel(Base):
+    __tablename__ = "scan_jobs"
+
+    id = Column(String(64), primary_key=True)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    target = Column(String(255), nullable=False)
+    status = Column(String(32), default="pending", nullable=False)
+    steps = Column(JSONB, default=list)
+    results = Column(JSONB, default=dict)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    project = relationship("ProjectModel", back_populates="scan_jobs")
+
+
+class HttpxResultModel(Base):
+    __tablename__ = "httpx_results"
+
+    id = Column(String(64), primary_key=True)
+    job_id = Column(String(64), ForeignKey("scan_jobs.id"), nullable=False)
+    url = Column(String(500), nullable=False)
+    status_code = Column(Integer, nullable=True)
+    title = Column(String(500), nullable=True)
+    tech = Column(JSONB, default=list)
+    server = Column(String(255), nullable=True)
+    content_length = Column(Integer, nullable=True)
+    redirect_url = Column(String(500), nullable=True)
+    websocket = Column(String(255), nullable=True)
+    tls_data = Column(JSONB, nullable=True)
+    favicon_hash = Column(String(64), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

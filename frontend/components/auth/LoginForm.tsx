@@ -28,6 +28,15 @@ export function LoginForm() {
         return;
       }
 
+      const data = await res.json();
+
+      if (data.data?.access_token) {
+        localStorage.setItem("access_token", data.data.access_token);
+      }
+      if (data.data?.user_id) {
+        localStorage.setItem("user_id", data.data.user_id);
+      }
+
       router.push("/projects");
     } catch {
       setError("Network error. Please try again.");

@@ -23,7 +23,7 @@ async def register(
 ) -> Any:
     try:
         user = await user_service.register(body, ip=request.client.host if request.client else None)
-        return created_response(user.model_dump())
+        return created_response(user.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code=getattr(e, "code", "REGISTRATION_ERROR"))
 
@@ -35,18 +35,21 @@ async def login(
     user_service: Any = Depends(get_user_service),
 ) -> Any:
     try:
-        access_token, refresh_token = await user_service.authenticate(
+        access_token, refresh_token, user_id = await user_service.authenticate(
             body.email, body.password,
             ip=request.client.host if request.client else None,
         )
         return success_response({
             "access_token": access_token,
             "refresh_token": refresh_token,
+            "user_id": user_id,
             "token_type": "bearer",
             "expires_in": 3600,
         })
-    except Exception:
-        return error_response("Invalid credentials", code="AUTHENTICATION_ERROR")
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return error_response(f"Authentication failed: {e}", code="AUTHENTICATION_ERROR")
 
 
 @router.get("/me")

@@ -26,7 +26,7 @@ async def create_finding(
 ) -> Any:
     try:
         finding = await finding_service.create(body, x_user_id)
-        return created_response(finding.model_dump())
+        return created_response(finding.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="FINDING_CREATE_ERROR")
 
@@ -39,7 +39,7 @@ async def list_findings(
     finding_service: Any = Depends(get_finding_service),
 ) -> Any:
     result = await finding_service.list_by_assessment(assessment_id, page, page_size)
-    return paginated_response(result.data, result.pagination.total, page, page_size)
+    return paginated_response([d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size)
 
 
 @router.get("/{finding_id}")
@@ -49,6 +49,6 @@ async def get_finding(
 ) -> Any:
     try:
         finding = await finding_service.get_by_id(finding_id)
-        return success_response(finding.model_dump())
+        return success_response(finding.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="FINDING_GET_ERROR")
