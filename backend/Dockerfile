@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY backend/ .
+COPY backend/ /app/
 
 RUN pip install --no-cache-dir fastapi uvicorn[standard] sqlalchemy[asyncio] asyncpg alembic redis[hiredis] pydantic pydantic-settings httpx python-multipart websockets cryptography orjson structlog tenacity pyjwt bcrypt
 
