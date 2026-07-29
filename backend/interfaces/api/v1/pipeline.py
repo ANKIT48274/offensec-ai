@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Query
 
 from backend.application.dto import PipelineStartDTO
+from backend.application.services.pipeline_service import PipelineService
+from backend.infrastructure.auth_deps import get_current_user_id
 from backend.infrastructure.di import get_pipeline_service
 from backend.interfaces.api.responses import (
     created_response,
@@ -14,7 +16,6 @@ from backend.interfaces.api.responses import (
     paginated_response,
     success_response,
 )
-from backend.application.services.pipeline_service import PipelineService
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ router = APIRouter()
 @router.post("/start")
 async def start_pipeline(
     body: PipelineStartDTO,
-    x_user_id: str | None = Header(default=None),
+    user_id: str = Depends(get_current_user_id),
     pipeline_service: PipelineService = Depends(get_pipeline_service),
 ) -> Any:
     try:

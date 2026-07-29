@@ -52,8 +52,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     logger.info("Shutting down")
     if app.state.redis:
-        await app.state.redis.close()
-        await app.state.redis.wait_closed()
+        await app.state.redis.aclose()
 
 
 class _NoopEventBus:

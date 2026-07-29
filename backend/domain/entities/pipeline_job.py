@@ -17,6 +17,7 @@ class PipelineJob:
     steps: list[dict[str, Any]] = field(default_factory=lambda: [
         {"name": "nmap", "status": "pending"},
         {"name": "httpx", "status": "pending"},
+        {"name": "nuclei", "status": "pending"},
     ])
     results: dict[str, Any] = field(default_factory=dict)
     error_message: str | None = None

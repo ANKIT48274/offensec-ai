@@ -40,6 +40,9 @@ class ProjectModel(Base):
     assessments = relationship("AssessmentModel", back_populates="project", cascade="all, delete-orphan")
     scans = relationship("ScanModel", back_populates="project", cascade="all, delete-orphan")
     scan_jobs = relationship("ScanJobModel", back_populates="project", cascade="all, delete-orphan")
+    assets = relationship("AssetModel", back_populates="project", cascade="all, delete-orphan")
+    ai_analyses = relationship("AICorrelationModel", back_populates="project", cascade="all, delete-orphan")
+    attack_paths = relationship("AttackPathModel", back_populates="project", cascade="all, delete-orphan")
 
 
 class AssessmentModel(Base):
@@ -210,6 +213,119 @@ class ScanJobModel(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     project = relationship("ProjectModel", back_populates="scan_jobs")
+    nuclei_results = relationship("NucleiResultModel", back_populates="job", cascade="all, delete-orphan")
+
+
+class AssetModel(Base):
+    __tablename__ = "assets"
+
+    id = Column(String(64), primary_key=True)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    asset_type = Column(String(32), nullable=False)
+    value = Column(String(500), nullable=False)
+    label = Column(String(255), nullable=True)
+    ips = Column(JSONB, default=list)
+    hostnames = Column(JSONB, default=list)
+    domains = Column(JSONB, default=list)
+    ports = Column(JSONB, default=list)
+    technologies = Column(JSONB, default=list)
+    os_guesses = Column(JSONB, default=list)
+    first_seen = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    last_seen = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    scan_count = Column(Integer, default=1)
+    asset_meta = Column("metadata", JSONB, default=dict)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    project = relationship("ProjectModel", back_populates="assets")
+
+
+class AssetHistoryModel(Base):
+    __tablename__ = "asset_history"
+
+    id = Column(String(64), primary_key=True)
+    asset_id = Column(String(64), ForeignKey("assets.id"), nullable=False)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    event = Column(String(64), nullable=False)
+    detail = Column(JSONB, default=dict)
+    occurred_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class EvidenceModelNew(Base):
+    __tablename__ = "evidence"
+
+    id = Column(String(64), primary_key=True)
+    asset_id = Column(String(64), ForeignKey("assets.id"), nullable=False)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    finding_id = Column(String(64), nullable=True)
+    source = Column(String(64), nullable=False)
+    evidence_type = Column(String(64), nullable=False)
+    content = Column(Text, nullable=True)
+    file_path = Column(String(500), nullable=True)
+    raw_data = Column(JSONB, nullable=True)
+    captured_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class AICorrelationModel(Base):
+    __tablename__ = "ai_analysis"
+
+    id = Column(String(64), primary_key=True)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    analysis_type = Column(String(64), nullable=False)
+    title = Column(String(500), nullable=False)
+    summary = Column(Text, nullable=True)
+    severity = Column(String(32), nullable=True)
+    risk_score = Column(Integer, nullable=True)
+    assets = Column(JSONB, default=list)
+    findings = Column(JSONB, default=list)
+    attack_paths = Column(JSONB, default=list)
+    recommendations = Column(JSONB, default=list)
+    raw_analysis = Column(JSONB, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    project = relationship("ProjectModel", back_populates="ai_analyses")
+
+
+class AttackPathModel(Base):
+    __tablename__ = "attack_paths"
+
+    id = Column(String(64), primary_key=True)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    source = Column(String(255), nullable=False)
+    destination = Column(String(255), nullable=False)
+    technique = Column(String(255), nullable=False)
+    score = Column(Integer, default=50)
+    evidence = Column(JSONB, default=list)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    project = relationship("ProjectModel", back_populates="attack_paths")
+
+
+class NucleiResultModel(Base):
+    __tablename__ = "nuclei_results"
+
+    id = Column(String(64), primary_key=True)
+    job_id = Column(String(64), ForeignKey("scan_jobs.id"), nullable=False)
+    project_id = Column(String(64), ForeignKey("projects.id"), nullable=False)
+    target = Column(String(255), nullable=False)
+    template_id = Column(String(255), nullable=False)
+    template_name = Column(String(500), nullable=True)
+    severity = Column(String(32), nullable=False)
+    matched_url = Column(String(500), nullable=True)
+    matched_at = Column(String(255), nullable=True)
+    protocol = Column(String(32), nullable=True)
+    tags = Column(JSONB, default=list)
+    ref_url = Column(String(500), nullable=True)
+    cwe_ids = Column(JSONB, default=list)
+    cve_ids = Column(JSONB, default=list)
+    cvss_score = Column(String(16), nullable=True)
+    description = Column(Text, nullable=True)
+    remediation = Column(Text, nullable=True)
+    extracted_results = Column(JSONB, default=list)
+    raw_data = Column(JSONB, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    job = relationship("ScanJobModel", back_populates="nuclei_results")
 
 
 class HttpxResultModel(Base):

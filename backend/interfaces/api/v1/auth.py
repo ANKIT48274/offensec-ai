@@ -5,14 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from backend.application.dto import UserLoginDTO, UserRegisterDTO
+from backend.infrastructure.auth_deps import get_current_user_id
 from backend.infrastructure.di import get_user_service
 from backend.interfaces.api.responses import created_response, error_response, success_response
 
 router = APIRouter()
-security = HTTPBearer()
 
 
 @router.post("/register")
@@ -47,13 +46,16 @@ async def login(
             "expires_in": 3600,
         })
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return error_response(f"Authentication failed: {e}", code="AUTHENTICATION_ERROR")
 
 
 @router.get("/me")
 async def me(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user_id: str = Depends(get_current_user_id),
+    user_service: Any = Depends(get_user_service),
 ) -> Any:
-    return success_response({"message": "Authenticated"})
+    try:
+        user = await user_service.get_by_id(user_id)
+        return success_response(user.model_dump(mode="json"))
+    except Exception as e:
+        return error_response(str(e), code="USER_GET_ERROR")

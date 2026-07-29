@@ -24,13 +24,25 @@ from backend.infrastructure.persistence.redis import RedisCache, TokenBlacklist
 from backend.infrastructure.reporting import MarkdownReportGenerator
 
 
+from backend.application.services.asset_service import AssetService
+from backend.application.services.correlation_service import CorrelationService
+from backend.application.services.nuclei_service import NucleiResultsService
 from backend.application.services.scan_service import ScanService
 from backend.application.services.pipeline_service import PipelineService
+from backend.infrastructure.persistence.postgres.repositories.asset_repository import (
+    AssetRepository,
+)
+from backend.infrastructure.persistence.postgres.repositories.evidence_repository import (
+    EvidenceRepository,
+)
 from backend.infrastructure.persistence.postgres.repositories.scan_repository import (
     ScanRepository,
 )
 from backend.infrastructure.persistence.postgres.repositories.pipeline_repository import (
     PipelineJobRepository,
+)
+from backend.infrastructure.persistence.postgres.repositories.nuclei_repository import (
+    NucleiResultRepository,
 )
 
 __all__ = [
@@ -41,6 +53,9 @@ __all__ = [
     "get_report_generator_service",
     "get_scan_service",
     "get_pipeline_service",
+    "get_nuclei_service",
+    "get_asset_service",
+    "get_correlation_service",
     "get_ai_client",
     "get_cache",
     "get_token_blacklist",
@@ -53,11 +68,33 @@ async def get_db_session(request: Request) -> AsyncGenerator[AsyncSession, None]
         yield session
 
 
+async def get_correlation_service(
+    session: AsyncSession = Depends(get_db_session),
+) -> CorrelationService:
+    return CorrelationService(session=session)
+
+
+async def get_asset_service(
+    session: AsyncSession = Depends(get_db_session),
+) -> AssetService:
+    asset_repo = AssetRepository(session)
+    evidence_repo = EvidenceRepository(session)
+    return AssetService(asset_repo=asset_repo, evidence_repo=evidence_repo)
+
+
+async def get_nuclei_service(
+    session: AsyncSession = Depends(get_db_session),
+) -> NucleiResultsService:
+    repo = NucleiResultRepository(session)
+    return NucleiResultsService(repo=repo)
+
+
 async def get_pipeline_service(
     session: AsyncSession = Depends(get_db_session),
 ) -> PipelineService:
-    repo = PipelineJobRepository(session)
-    return PipelineService(repo=repo)
+    job_repo = PipelineJobRepository(session)
+    nuclei_repo = NucleiResultRepository(session)
+    return PipelineService(repo=job_repo, nuclei_repo=nuclei_repo)
 
 
 async def get_scan_service(

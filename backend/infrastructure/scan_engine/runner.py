@@ -13,6 +13,16 @@ from backend.infrastructure.scan_engine.xml_parser import parse_nmap_xml
 
 NMAP_TIMEOUT = 600
 NMAP_BASE_ARGS = ["-Pn", "-sV", "-sC", "-O", "-oX"]
+MAX_STDERR_BYTES = 65536
+
+
+async def _terminate_gracefully(proc: asyncio.subprocess.Process, timeout: float = 5.0) -> None:
+    try:
+        proc.terminate()
+        await asyncio.wait_for(proc.wait(), timeout=timeout)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
 
 
 async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, Any]:
@@ -37,13 +47,12 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
         try:
             _, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
         except asyncio.TimeoutError:
-            proc.kill()
-            await proc.wait()
+            await _terminate_gracefully(proc)
             _cleanup_file(xml_path)
             raise TimeoutError(f"Nmap scan timed out after {timeout}s for target: {target}")
 
         if proc.returncode != 0:
-            error_msg = stderr.decode("utf-8", errors="replace").strip()
+            error_msg = stderr.decode("utf-8", errors="replace")[:MAX_STDERR_BYTES].strip()
             _cleanup_file(xml_path)
             raise RuntimeError(f"Nmap failed (exit {proc.returncode}): {error_msg or 'Unknown error'}")
 
@@ -56,8 +65,9 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
 
         parsed = parse_nmap_xml(xml_content)
 
+        _cleanup_file(xml_path)
+
         return {
-            "xml_path": xml_path,
             "xml_content": xml_content,
             "parsed": parsed,
             "target": target.strip(),
@@ -65,8 +75,10 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
         }
 
     except FileNotFoundError as e:
+        _cleanup_file(xml_path)
         raise RuntimeError(f"Nmap not found on system: {e}")
     except OSError as e:
+        _cleanup_file(xml_path)
         raise RuntimeError(f"OS error executing nmap: {e}")
 
 
@@ -83,13 +95,15 @@ def _is_valid_target(target: str) -> bool:
     except ValueError:
         pass
     import re
-    hostname_re = re.compile(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*(?:[a-zA-Z]{2,63})$")
+    hostname_re = re.compile(r"^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)\.)*(?:[a-zA-Z]{2,63})$")
     if hostname_re.match(target):
         return True
     return False
 
 
 def _cleanup_file(path: str) -> None:
+    if not path:
+        return
     try:
         if os.path.exists(path):
             os.unlink(path)

@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Query
 
 from backend.application.dto import FindingCreateDTO
+from backend.infrastructure.auth_deps import get_current_user_id
 from backend.infrastructure.di import get_finding_service
 from backend.interfaces.api.responses import (
     created_response,
@@ -21,11 +22,11 @@ router = APIRouter()
 @router.post("")
 async def create_finding(
     body: FindingCreateDTO,
-    x_user_id: str = Header(""),
+    user_id: str = Depends(get_current_user_id),
     finding_service: Any = Depends(get_finding_service),
 ) -> Any:
     try:
-        finding = await finding_service.create(body, x_user_id)
+        finding = await finding_service.create(body, user_id)
         return created_response(finding.model_dump(mode="json"))
     except Exception as e:
         return error_response(str(e), code="FINDING_CREATE_ERROR")
@@ -39,7 +40,12 @@ async def list_findings(
     finding_service: Any = Depends(get_finding_service),
 ) -> Any:
     result = await finding_service.list_by_assessment(assessment_id, page, page_size)
-    return paginated_response([d.model_dump(mode="json") for d in result.data], result.pagination.total, page, page_size)
+    return paginated_response(
+        [d.model_dump(mode="json") for d in result.data],
+        result.pagination.total,
+        page,
+        page_size,
+    )
 
 
 @router.get("/{finding_id}")

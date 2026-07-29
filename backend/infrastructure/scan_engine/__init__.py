@@ -1,1 +1,1 @@
-"""Scan engine infrastructure — Nmap XML parsing and subprocess execution."""
+"""Scan engine — Nmap execution and XML parsing."""

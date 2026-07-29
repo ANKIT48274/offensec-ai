@@ -231,6 +231,80 @@ class HttpxResultDTO(BaseModel):
     created_at: datetime
 
 
+class NucleiResultResponseDTO(BaseModel):
+    id: str
+    job_id: str
+    project_id: str
+    target: str
+    template_id: str
+    template_name: str | None = None
+    severity: str
+    matched_url: str | None = None
+    matched_at: str | None = None
+    protocol: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    ref_url: str | None = None
+    cwe_ids: list[str] = Field(default_factory=list)
+    cve_ids: list[str] = Field(default_factory=list)
+    cvss_score: str | None = None
+    description: str | None = None
+    remediation: str | None = None
+    created_at: datetime
+
+
+class AssetResponseDTO(BaseModel):
+    id: str
+    project_id: str
+    asset_type: str
+    value: str
+    label: str | None = None
+    ips: list[str] = Field(default_factory=list)
+    hostnames: list[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
+    ports: list[dict[str, Any]] = Field(default_factory=list)
+    technologies: list[str] = Field(default_factory=list)
+    os_guesses: list[str] = Field(default_factory=list)
+    first_seen: datetime | None = None
+    last_seen: datetime | None = None
+    scan_count: int = 1
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+class EvidenceResponseDTO(BaseModel):
+    id: str
+    asset_id: str
+    project_id: str
+    finding_id: str | None = None
+    source: str
+    evidence_type: str
+    content: str | None = None
+    file_path: str | None = None
+    raw_data: dict[str, Any] | None = None
+    captured_at: datetime | None = None
+
+
+class AnalysisRequestDTO(BaseModel):
+    project_id: str = Field(..., min_length=1)
+    force: bool = False
+
+
+class CorrelationResultDTO(BaseModel):
+    id: str
+    project_id: str
+    analysis_type: str
+    title: str
+    summary: str | None = None
+    severity: str | None = None
+    risk_score: int | None = None
+    assets: list[str] = Field(default_factory=list)
+    findings: list[dict[str, Any]] = Field(default_factory=list)
+    attack_paths: list[dict[str, Any]] = Field(default_factory=list)
+    recommendations: list[str] = Field(default_factory=list)
+    created_at: datetime | None = None
+
+
 class PaginationDTO(BaseModel):
     """DTO for paginated responses."""
 

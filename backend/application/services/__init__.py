@@ -83,6 +83,13 @@ class UserService:
         )
         return result
 
+    async def get_by_id(self, user_id: str) -> UserResponseDTO:
+        user = await self._user_repo.get_by_id(user_id)
+        if not user:
+            from backend.domain.exceptions import EntityNotFoundError
+            raise EntityNotFoundError("User", user_id)
+        return user
+
     async def authenticate(self, email: str, password: str, ip: str | None = None) -> tuple[str, str]:
         user = await self._user_repo.get_by_email(email)
         if not user:

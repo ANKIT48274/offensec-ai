@@ -1,4 +1,4 @@
-"""JWT authentication service."""
+"""JWT authentication service and dependency."""
 
 from __future__ import annotations
 
@@ -14,7 +14,14 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 
 def get_jwt_secret() -> str:
-    return os.environ.get("JWT_SECRET", "offensec-ai-default-jwt-secret-min-32-bytes!!")
+    secret = os.environ.get("JWT_SECRET")
+    if not secret:
+        raise RuntimeError(
+            "JWT_SECRET environment variable is not set. "
+            "Set a secure random string (minimum 32 characters) before starting the application. "
+            "Example: python3 -c 'import secrets; print(secrets.token_hex(32))'"
+        )
+    return secret
 
 
 def get_jwt_algorithm() -> str:
