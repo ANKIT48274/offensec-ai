@@ -1,22 +1,25 @@
 FROM python:3.12-slim
 
-WORKDIR /app/backend
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY backend/pyproject.toml backend/
 RUN pip install --no-cache-dir backend/
 
 COPY backend/ backend/
 
-WORKDIR /app
-
-ENV PYTHONPATH=/app
-
 RUN addgroup --system --gid 1001 offensec && \
     adduser --system --uid 1001 --no-create-home offensec && \
     mkdir -p /var/log/offensec && \
-    chown -R offensec:offensec /app /var/log/offensec
+    chown -R offensec:offensec /app/backend /var/log/offensec
 
 USER offensec
+
+WORKDIR /app/backend
 
 EXPOSE 8000
 
