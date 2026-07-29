@@ -24,10 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /root/.local /root/.local
-COPY --from=builder /build/.egg-info /build/
 
 ENV PATH=/root/.local/bin:$PATH \
-    PYTHONPATH=/app
+    PYTHONPATH=/app:/root/.local/lib/python3.12/site-packages
 
 COPY . .
 
