@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN adduser --system --no-create-home offensec
+
+COPY pyproject.toml .
+RUN pip install --no-cache-dir .
+
+COPY . .
+
+USER offensec
+
+CMD ["python", "-m", "offensec.plugins.sandbox.runtime"]

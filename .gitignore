@@ -1,0 +1,89 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Node.js
+node_modules/
+.next/
+out/
+.cache/next/
+
+# TypeScript build artifacts
+dist/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+coverage/
+.coverage.*
+.nyc_output/
+.pytest_cache/
+.htmlcov/
+*.report.xml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Uploads
+uploads/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Secrets
+*.pem
+*.key
+*.cert
+**/secrets/
+
+# Build artifacts
+*.whl
+*.tar.gz
+
+# Ruff
+.ruff_cache/
+
+# OS
+__pycache__/

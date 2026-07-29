@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["offensec*"]
+namespaces = true
+
+[project]
+name = "offensec-knowledge"
+version = "0.1.0"
+description = "OffenSec AI — Knowledge Base"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "OffenSec AI Contributors" },
+]
+
+dependencies = [
+    "pydantic>=2.10.0",
+    "pyyaml>=6.0.0",
+    "structlog>=24.4.0",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["../tests/unit/knowledge"]

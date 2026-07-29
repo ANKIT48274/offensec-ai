@@ -1,0 +1,45 @@
+[project]
+name = "offensec-ai"
+version = "0.1.0"
+description = "AI-Powered Offensive Security Platform"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+    { name = "OffenSec AI Contributors" },
+]
+
+dependencies = []
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = ["__pycache__", ".venv", "node_modules"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "SIM", "ARG", "C4", "T20", "RUF"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+exclude = ["__pycache__", ".venv"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "e2e: End-to-end tests",
+    "security: Security-related tests",
+    "slow: Slow tests requiring additional time",
+    "ai: AI-dependent tests",
+    "online: Tests requiring network access",
+]
+filterwarnings = ["error"]
+log_cli = true
+log_cli_level = "INFO"
