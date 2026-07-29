@@ -7,12 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies first (caching layer)
-COPY backend/pyproject.toml /tmp/backend/
-RUN pip install --no-cache-dir /tmp/backend/
+COPY backend/ .
 
-# Copy all backend source code
-COPY backend/ backend/
+RUN pip install --no-cache-dir fastapi uvicorn[standard] sqlalchemy[asyncio] asyncpg alembic redis[hiredis] pydantic pydantic-settings httpx python-multipart websockets cryptography orjson structlog tenacity pyjwt bcrypt
 
 ENV PYTHONPATH=/app
 
