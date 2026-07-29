@@ -22,9 +22,15 @@ _session_factory = None
 
 
 def get_database_url() -> str:
-    return os.environ.get(
-        "DATABASE_URL",
-        "postgresql+asyncpg://offensec:changeme@localhost:5432/offensec",
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return url
+    env = os.environ.get("ENVIRONMENT", "development")
+    if env == "development":
+        return "postgresql+asyncpg://offensec:changeme@localhost:5432/offensec"
+    raise RuntimeError(
+        "DATABASE_URL environment variable is required in production. "
+        "Example: postgresql+asyncpg://user:password@host:5432/offensec"
     )
 
 
