@@ -8,7 +8,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir tomli && \
+    python -c "
+import tomli
+with open('pyproject.toml', 'rb') as f:
+    data = tomli.load(f)
+deps = data.get('project', {}).get('dependencies', [])
+print('\n'.join(deps))
+" | pip install --no-cache-dir -r /dev/stdin
 
 COPY . .
 
