@@ -7,17 +7,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
-RUN pip install --no-cache-dir tomli && \
-    python -c "
-import tomli
-with open('pyproject.toml', 'rb') as f:
-    data = tomli.load(f)
-deps = data.get('project', {}).get('dependencies', [])
-print('\n'.join(deps))
-" | pip install --no-cache-dir -r /dev/stdin
+COPY pyproject.toml ./
+COPY backend/ backend/
 
-COPY . .
+RUN pip install --no-cache-dir .
 
 ENV PYTHONPATH=/app
 
