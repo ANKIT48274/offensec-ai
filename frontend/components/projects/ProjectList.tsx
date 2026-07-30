@@ -17,7 +17,10 @@ export function ProjectList() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const res = await fetch("/api/v1/projects");
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : "";
+        const res = await fetch("/api/v1/projects", {
+          headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        });
         const data = await res.json();
         setProjects(data.data || []);
       } catch {
