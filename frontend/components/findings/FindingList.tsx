@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -17,7 +18,7 @@ export function FindingList() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/v1/findings");
+        const res = await authFetch("/api/v1/findings");
         const data = await res.json();
         setFindings(data.data || []);
       } catch {

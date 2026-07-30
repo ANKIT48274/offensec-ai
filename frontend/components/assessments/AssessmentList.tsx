@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -10,7 +11,7 @@ export function AssessmentList() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/v1/assessments");
+        const res = await authFetch("/api/v1/assessments");
         const data = await res.json();
         setAssessments(data.data || []);
       } catch {

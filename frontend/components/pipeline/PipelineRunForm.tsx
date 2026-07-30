@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useState } from "react";
 
@@ -25,7 +26,7 @@ export function PipelineRunForm({ projectId }: { projectId: string }) {
     setJob(null);
 
     try {
-      const res = await fetch("/api/v1/pipeline/start", {
+      const res = await authFetch("/api/v1/pipeline/start", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -12,7 +13,7 @@ export function AssessmentDetail() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`/api/v1/assessments/${id}`);
+        const res = await authFetch(`/api/v1/assessments/${id}`);
         const data = await res.json();
         setAssessment(data.data);
       } catch {

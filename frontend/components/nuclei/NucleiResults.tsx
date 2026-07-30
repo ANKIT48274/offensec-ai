@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 
@@ -28,7 +29,7 @@ export function NucleiResultsView({ projectId }: { projectId: string }) {
         const params = new URLSearchParams({ project_id: projectId });
         if (severity !== "all") params.set("severity", severity);
         if (search) params.set("search", search);
-        const res = await fetch(`/api/v1/nuclei/results?${params}`);
+        const res = await authFetch(`/api/v1/nuclei/results?${params}`);
         const data = await res.json();
         setFindings(data.data || []);
       } catch {

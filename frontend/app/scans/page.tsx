@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -20,7 +21,7 @@ export default function ScansPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/v1/scans?project_id=");
+        const res = await authFetch("/api/v1/scans?project_id=");
         const data = await res.json();
         setScans(data.data || []);
       } catch {

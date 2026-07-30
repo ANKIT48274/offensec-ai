@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -18,7 +19,7 @@ export default function PipelinePage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/v1/pipeline/jobs?project_id=");
+        const res = await authFetch("/api/v1/pipeline/jobs?project_id=");
         const data = await res.json();
         setJobs(data.data || []);
       } catch {

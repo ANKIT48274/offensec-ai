@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -12,7 +13,7 @@ export function FindingDetail() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch(`/api/v1/findings/${id}`);
+        const res = await authFetch(`/api/v1/findings/${id}`);
         const data = await res.json();
         setFinding(data.data);
       } catch {

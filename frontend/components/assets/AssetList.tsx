@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -25,7 +26,7 @@ export function AssetList({ projectId }: { projectId: string }) {
     async function load() {
       try {
         const params = new URLSearchParams({ project_id: projectId, page_size: "100" });
-        const res = await fetch(`/api/v1/assets?${params}`);
+        const res = await authFetch(`/api/v1/assets?${params}`);
         const data = await res.json();
         setAssets(data.data || []);
       } catch {

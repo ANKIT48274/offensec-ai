@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useState } from "react";
 
@@ -26,7 +27,7 @@ export function ScanRunForm({ projectId }: { projectId: string }) {
     setScan(null);
 
     try {
-      const res = await fetch("/api/v1/scans", {
+      const res = await authFetch("/api/v1/scans", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/api/auth-fetch";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -13,7 +14,7 @@ export function ProjectDetail() {
   useEffect(() => {
     async function fetchProject() {
       try {
-        const res = await fetch(`/api/v1/projects/${id}`);
+        const res = await authFetch(`/api/v1/projects/${id}`);
         const data = await res.json();
         setProject(data.data);
       } catch {
