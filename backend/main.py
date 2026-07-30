@@ -33,11 +33,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     app.state.db_session_factory = factory
     app.state.redis = await create_redis_client()
 
-    try:
-        await init_models()
-        logger.info("Database tables initialized")
-    except Exception as e:
-        logger.warning("Database init skipped (connect to PostgreSQL first): %s", e)
+    logger.info("Database tables managed via Alembic migrations (run: alembic upgrade head)")
 
     app.state.password_hasher = BcryptHasher()
     app.state.token_service = JWTService()
