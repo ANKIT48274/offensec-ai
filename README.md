@@ -208,8 +208,8 @@ echo "JWT_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" >
 # Start all services (PostgreSQL, Redis, Backend, Frontend)
 docker compose up -d
 
-# Apply database migrations
-docker compose exec backend alembic upgrade head
+# Apply database migrations (alembic.ini lives under /app/backend in the container)
+docker compose exec backend alembic -c backend/alembic.ini upgrade head
 
 # Verify everything is healthy
 docker compose ps          # all services should show "(healthy)"
