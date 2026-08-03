@@ -138,3 +138,5 @@
 ## Acknowledgements
 
 Built with open-source tools: FastAPI, Next.js, SQLAlchemy, PostgreSQL, Redis, Docker, and the security testing community.
+
+**Author:** Ankit Patidar ([@ANKIT48274](https://github.com/ANKIT48274))

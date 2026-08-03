@@ -5,6 +5,7 @@ description = "AI-Powered Offensive Security Platform"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [
+    { name = "Ankit Patidar", email = "ankitpatidar.sec@gmail.com" },
     { name = "OffenSec AI Contributors" },
 ]
 

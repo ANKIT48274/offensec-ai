@@ -13,6 +13,7 @@ description = "OffenSec AI — Plugin System"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 authors = [
+    { name = "Ankit Patidar", email = "ankitpatidar.sec@gmail.com" },
     { name = "OffenSec AI Contributors" },
 ]
 

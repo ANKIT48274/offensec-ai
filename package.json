@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "OffenSec AI monorepo workspace",
+  "author": "Ankit Patidar (https://github.com/ANKIT48274)",
   "workspaces": [
     "frontend"
   ],

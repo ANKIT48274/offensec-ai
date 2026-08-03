@@ -455,4 +455,10 @@ MIT License. See [LICENSE](LICENSE) for full text.
 
 ---
 
-<p align="center">Built with ❤️ for the security community</p>
+## Author
+
+**Ankit Patidar** ([@ANKIT48274](https://github.com/ANKIT48274))
+
+---
+
+<p align="center">Built with ❤️ by Ankit Patidar for the security community</p>
