@@ -8,6 +8,7 @@ from backend.interfaces.api.v1.assessments import router as assessments_router
 from backend.interfaces.api.v1.assets import router as assets_router
 from backend.interfaces.api.v1.auth import router as auth_router
 from backend.interfaces.api.v1.dashboard import router as dashboard_router
+from backend.interfaces.api.v1.discovery import router as discovery_router
 from backend.interfaces.api.v1.evidence import router as evidence_router
 from backend.interfaces.api.v1.findings import router as findings_router
 from backend.interfaces.api.v1.nuclei import router as nuclei_router
@@ -35,3 +36,4 @@ api_v1_router.include_router(nuclei_router, prefix="/nuclei", tags=["Nuclei"])
 api_v1_router.include_router(assets_router, prefix="/assets", tags=["Assets"])
 api_v1_router.include_router(evidence_router, prefix="/evidence", tags=["Evidence"])
 api_v1_router.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
+api_v1_router.include_router(discovery_router, prefix="/discovery", tags=["Discovery"])

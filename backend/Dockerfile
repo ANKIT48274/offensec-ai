@@ -40,6 +40,14 @@ RUN set -eux; \
     chmod +x /usr/local/bin/ffuf; \
     rm -rf /tmp/ffuf*
 
+# Download minimal wordlists for ffuf + subdomain enumeration
+# (Seclists full repo is too large; grab the two most-used lists)
+RUN mkdir -p /usr/share/seclists/Discovery/Web-Content /usr/share/seclists/Discovery/DNS \
+    && curl -fL --retry 3 --retry-delay 2 -o /usr/share/seclists/Discovery/Web-Content/common.txt \
+        "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/common.txt" \
+    && curl -fL --retry 3 --retry-delay 2 -o /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+        "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/subdomains-top1million-5000.txt"
+
 COPY backend /app/backend/
 
 # Install Python deps FIRST, then re-install the ProjectDiscovery httpx binary.

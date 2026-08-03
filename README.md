@@ -285,7 +285,7 @@ npm run dev
 
 ## API Overview
 
-The API exposes **41 endpoints** across 13 resource groups.
+The API exposes **47 endpoints** across 14 resource groups.
 
 | Group | Prefix | Endpoints | Auth |
 |-------|--------|-----------|------|
@@ -302,6 +302,7 @@ The API exposes **41 endpoints** across 13 resource groups.
 | Evidence | `/evidence` | List, Get | Yes |
 | AI | `/ai` | Analyze, Report, Attack Paths | Yes |
 | Dashboard | `/dashboard` | Overview, Trends, Graph | Yes |
+| Discovery | `/discovery` | DNS, WHOIS, Subdomains, TLS, Katana, FFUF | Yes |
 | Plugins | `/plugins` | CRUD | Yes |
 
 **Health endpoints:** `/health` on the backend (port 8000) and `/health` on the frontend (port 3000) — used by container healthchecks and monitoring.
