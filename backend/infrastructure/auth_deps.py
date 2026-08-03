@@ -32,7 +32,19 @@ async def get_current_user_id(
 
     try:
         token_service: JWTService = request.app.state.token_service
-        user_id = token_service.get_user_id_from_token(token)
+        payload = token_service.decode_token(token)
+
+        # Reject revoked (logged-out) tokens.
+        jti = payload.get("jti")
+        if jti:
+            blacklist = getattr(request.app.state, "token_blacklist", None)
+            if blacklist is not None:
+                if await blacklist.is_blacklisted(jti):
+                    raise ValueError("Token has been revoked")
+
+        user_id = payload.get("sub")
+        if not user_id:
+            raise ValueError("Token missing subject claim")
         return user_id
     except ValueError as e:
         raise HTTPException(

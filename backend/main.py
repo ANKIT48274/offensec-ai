@@ -15,8 +15,8 @@ from backend.infrastructure.ai_client import create_ai_client
 from backend.infrastructure.auth import JWTService
 from backend.infrastructure.logging import configure_logging, get_logger
 from backend.infrastructure.password_hasher import BcryptHasher
-from backend.infrastructure.persistence.postgres import create_session_factory, init_models
-from backend.infrastructure.persistence.redis import create_redis_client
+from backend.infrastructure.persistence.postgres import create_session_factory
+from backend.infrastructure.persistence.redis import TokenBlacklist, create_redis_client
 from backend.interfaces.api.middleware import register_middleware
 from backend.interfaces.api.responses import health_response
 from backend.interfaces.api.v1.router import api_v1_router
@@ -32,6 +32,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     factory = create_session_factory()
     app.state.db_session_factory = factory
     app.state.redis = await create_redis_client()
+    app.state.token_blacklist = TokenBlacklist()
 
     logger.info("Database tables managed via Alembic migrations (run: alembic upgrade head)")
 

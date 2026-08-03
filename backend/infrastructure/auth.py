@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -35,27 +36,32 @@ class JWTService:
         self._secret = secret or get_jwt_secret()
         self._algorithm = algorithm or get_jwt_algorithm()
 
-    def create_access_token(self, user_id: str, extra_claims: dict[str, Any] | None = None) -> str:
+    def _create_token(
+        self,
+        user_id: str,
+        token_type: str,
+        lifetime: timedelta,
+        extra_claims: dict[str, Any] | None = None,
+    ) -> str:
         now = datetime.now(UTC)
         payload: dict[str, Any] = {
             "sub": user_id,
             "iat": now,
-            "exp": now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-            "type": "access",
+            "exp": now + lifetime,
+            "type": token_type,
+            "jti": uuid.uuid4().hex,
         }
         if extra_claims:
             payload.update(extra_claims)
         return jwt.encode(payload, self._secret, algorithm=self._algorithm)
 
+    def create_access_token(self, user_id: str, extra_claims: dict[str, Any] | None = None) -> str:
+        return self._create_token(
+            user_id, "access", timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES), extra_claims
+        )
+
     def create_refresh_token(self, user_id: str) -> str:
-        now = datetime.now(UTC)
-        payload: dict[str, Any] = {
-            "sub": user_id,
-            "iat": now,
-            "exp": now + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
-            "type": "refresh",
-        }
-        return jwt.encode(payload, self._secret, algorithm=self._algorithm)
+        return self._create_token(user_id, "refresh", timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
 
     def decode_token(self, token: str) -> dict[str, Any]:
         try:
@@ -72,3 +78,11 @@ class JWTService:
         if not user_id:
             raise ValueError("Token missing subject claim")
         return user_id
+
+    def get_token_jti(self, token: str) -> str:
+        """Return the unique token ID (jti) claim for blacklisting."""
+        payload = self.decode_token(token)
+        jti = payload.get("jti")
+        if not jti:
+            raise ValueError("Token missing jti claim")
+        return jti

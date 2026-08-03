@@ -11,7 +11,9 @@ from typing import Any
 from backend.infrastructure.scan_engine.xml_parser import parse_nmap_xml
 
 NMAP_TIMEOUT = 600
-NMAP_BASE_ARGS = ["-Pn", "-sV", "-sC", "-O", "-oX"]
+# OS fingerprinting (-O) requires root privileges. In a containerized,
+# non-root deployment it must be dropped or nmap aborts with exit 1.
+NMAP_BASE_ARGS = ["-Pn", "-sV", "-sC", "-oX"]
 MAX_STDERR_BYTES = 65536
 
 
@@ -69,6 +71,7 @@ async def run_nmap_scan(target: str, timeout: int = NMAP_TIMEOUT) -> dict[str, A
         _cleanup_file(xml_path)
 
         return {
+            "xml_path": xml_path,
             "xml_content": xml_content,
             "parsed": parsed,
             "target": target.strip(),

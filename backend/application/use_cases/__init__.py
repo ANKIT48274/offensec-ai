@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from pydantic import BaseModel
+
 from backend.application.dto import (
     AIPlanRequestDTO,
     AIPlanResponseDTO,
@@ -40,16 +42,23 @@ class GenerateReportUseCase:
         self,
         finding_service: FindingService,
         report_generator: Any,
+        formats: dict[str, Any] | None = None,
     ) -> None:
         self._finding_service = finding_service
         self._report_generator = report_generator
+        self._formats = formats or {}
 
     async def execute(self, dto: ReportGenerateDTO) -> str:
         findings = await self._finding_service.list_by_assessment(dto.assessment_id, 1, 1000)
-        report = await self._report_generator.generate(
-            findings=[f.to_dict() for f in findings.data] if hasattr(findings, "data") else [],
-            format=dto.format,
-        )
+        if hasattr(findings, "data"):
+            finding_dicts = [
+                f.model_dump(mode="json") if isinstance(f, BaseModel) else f.to_dict()
+                for f in findings.data
+            ]
+        else:
+            finding_dicts = []
+        generator = self._formats.get(dto.format, self._report_generator)
+        report = await generator.generate(findings=finding_dicts)
         return report
 
 

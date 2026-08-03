@@ -46,7 +46,13 @@ from backend.domain.exceptions import (
     AuthorizationError,
     EntityNotFoundError,
 )
-from backend.domain.value_objects import AssessmentStatus, Confidence, FindingStatus, Severity
+from backend.domain.value_objects import (
+    AssessmentStatus,
+    Confidence,
+    FindingStatus,
+    ScopeDefinition,
+    Severity,
+)
 
 
 class UserService:
@@ -96,10 +102,13 @@ class UserService:
         self, email: str, password: str, ip: str | None = None
     ) -> tuple[str, str]:
         user = await self._user_repo.get_by_email(email)
+
+        # Use the same generic failure for unknown-user and bad-password so an
+        # attacker cannot enumerate which emails are registered.
         if not user:
-            raise AuthorizationError("unknown", "login", f"user {email}")
+            raise AuthorizationError("unknown", "login", "invalid credentials")
         if not self._password_hasher.verify(password, user.password_hash):
-            raise AuthorizationError(user.id, "login", f"user {email}")
+            raise AuthorizationError("unknown", "login", "invalid credentials")
 
         await self._user_repo.update(user.id, {"last_login_at": datetime.now(UTC)})
         access = self._token_service.create_access_token(user.id)
@@ -178,10 +187,12 @@ class AssessmentService:
         self._event_bus = event_bus
 
     async def create(self, dto: AssessmentCreateDTO, user_id: str) -> AssessmentResponseDTO:
+        scope_data = dict(dto.scope or {})
+        scope_data["targets"] = dto.targets
         assessment = Assessment(
             project_id=dto.project_id,
             name=dto.name,
-            scope={"targets": dto.targets, **(dto.scope or {})},
+            scope=ScopeDefinition(**scope_data),
             started_by=user_id,
         )
         result = await self._assessment_repo.create(assessment.to_dict())

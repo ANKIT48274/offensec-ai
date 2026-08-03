@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-08-03
+
+### Added
+- Redis-backed API rate limiting middleware (auth endpoints 10 req/min, general 120 req/min)
+- Refresh token revocation with Redis blacklist (`jti` claims on all tokens)
+- `POST /api/v1/auth/logout` endpoint that revokes the presented token
+- JWT `jti` claim for all access and refresh tokens
+- Frontend `/health` route for container healthchecks
+- Scan tools bundled in the backend Docker image (nmap, httpx, nuclei, katana, ffuf, whois, dig)
+- E2E smoke test suite covering the full user journey (register → login → project → assessment → finding → report → logout)
+- `project_id` now required on asset/evidence list endpoints (prevents unbounded queries)
+
+### Changed
+- `register`, `me`, and user list responses no longer expose `password_hash`
+- Backend Docker build uses pinned, deterministic scan-tool versions
+
+### Security
+- Password hashes are never returned from any API endpoint
+- Revoked tokens are rejected on every authenticated request
+- Rate limiting deters credential brute-forcing on login/register
+- Asset/evidence queries are always scoped to a project
+
 ## [1.0.0] — 2026-07-30
 
 ### Added

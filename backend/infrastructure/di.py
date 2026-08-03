@@ -41,7 +41,7 @@ from backend.infrastructure.persistence.postgres.repositories.scan_repository im
     ScanRepository,
 )
 from backend.infrastructure.persistence.redis import RedisCache, TokenBlacklist
-from backend.infrastructure.reporting import MarkdownReportGenerator
+from backend.infrastructure.reporting import MarkdownReportGenerator, PDFReportGenerator
 
 __all__ = [
     "get_ai_client",
@@ -170,6 +170,11 @@ async def get_report_generator_service(
     return GenerateReportUseCase(
         finding_service=finding_service,
         report_generator=MarkdownReportGenerator(),
+        formats={
+            "pdf": PDFReportGenerator(),
+            "markdown": MarkdownReportGenerator(),
+            "md": MarkdownReportGenerator(),
+        },
     )
 
 

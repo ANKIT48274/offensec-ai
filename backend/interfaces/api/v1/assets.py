@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("")
 async def list_assets(
-    project_id: str = Query(""),
+    project_id: str = Query(..., min_length=1, description="Project ID (required)"),
     asset_type: str | None = Query(None),
     search: str | None = Query(None),
     page: int = Query(1, ge=1),

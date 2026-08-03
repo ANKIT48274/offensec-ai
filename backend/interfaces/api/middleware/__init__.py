@@ -10,6 +10,8 @@ from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
+from backend.interfaces.api.middleware.rate_limit import RateLimitMiddleware
+
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Logs all incoming requests and their response times."""
@@ -54,3 +56,4 @@ def register_middleware(app: FastAPI) -> None:
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(ScopeEnforcementMiddleware)
     app.add_middleware(AuditMiddleware)
+    app.add_middleware(RateLimitMiddleware)

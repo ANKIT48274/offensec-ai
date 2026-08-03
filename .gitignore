@@ -87,3 +87,6 @@ uploads/
 
 # OS
 __pycache__/
+
+# Stale nested clone (safe to delete)
+offensec-ai/

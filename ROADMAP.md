@@ -28,12 +28,15 @@ Completed features:
 - [ ] WebSocket-based live scan progress in frontend
 - [ ] PDF report generation (WeasyPrint integration)
 - [ ] Light mode / dark mode theme toggle
-- [ ] API rate limiting middleware
 - [ ] Global error boundary in frontend
-- [ ] Refresh token blacklist (Redis-based revocation)
+- [x] API rate limiting middleware (Redis-backed, auth endpoints stricter)
+- [x] Refresh token blacklist (Redis-based revocation + logout endpoint)
 - [ ] Rollback database migrations to any revision
-- [ ] Frontend test suite (Playwright E2E)
+- [x] Frontend/API E2E test suite (full user journey against running stack)
 - [ ] Performance benchmark suite
+- [x] Password hash never exposed via API (register/me/users)
+- [x] Scan tools bundled in Docker image (nmap, httpx, nuclei, katana, ffuf)
+- [x] Frontend health endpoint for container healthchecks
 
 ## v1.2.0 — Intelligence
 

@@ -246,6 +246,8 @@ class FindingRepository:
     async def create(self, data: dict[str, Any]) -> FindingResponseDTO:
         if "references_data" not in data and "references" in data:
             data["references_data"] = data.pop("references", [])
+        if "evidence_data" not in data and "evidence" in data:
+            data["evidence_data"] = data.pop("evidence", [])
         model = FindingModel(**data)
         self._session.add(model)
         await self._session.commit()
@@ -311,7 +313,7 @@ class FindingRepository:
             confidence=model.confidence,
             status=model.status,
             target=model.target,
-            evidence=model.evidence or [],
+            evidence=model.evidence_data or [],
             references=model.references_data or [],
             owasp_id=model.owasp_id,
             cwe_id=model.cwe_id,

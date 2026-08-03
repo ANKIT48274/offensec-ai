@@ -37,6 +37,12 @@ class UserResponseDTO(BaseModel):
     updated_at: datetime
     last_login_at: datetime | None = None
 
+    def to_safe_dict(self) -> dict[str, Any]:
+        """Return user data without sensitive fields (password_hash)."""
+        data = self.model_dump(mode="json")
+        data.pop("password_hash", None)
+        return data
+
 
 class TokenResponseDTO(BaseModel):
     """DTO for JWT token response."""

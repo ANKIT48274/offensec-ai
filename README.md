@@ -9,9 +9,9 @@
 [![Docker](https://img.shields.io/badge/Docker-24%2B-2496ED?logo=docker)](https://docker.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql)](https://postgresql.org)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)](https://redis.io)
-[![Tests](https://img.shields.io/badge/Tests-179%20passing-brightgreen)](https://github.com/ANKIT48274/offensec-ai/actions)
+[![Tests](https://img.shields.io/badge/Tests-186%20passing-brightgreen)](https://github.com/ANKIT48274/offensec-ai/actions)
 [![Code Style](https://img.shields.io/badge/Code%20Style-Ruff-black)](https://astral.sh/ruff)
-[![Security](https://img.shields.io/badge/Security-JWT_%7C_bcrypt_%7C_CORS-important)](SECURITY.md)
+[![Security](https://img.shields.io/badge/Security-JWT_%7C_bcrypt_%7C_CORS_%7C_RateLimit-important)](SECURITY.md)
 [![GitHub Release](https://img.shields.io/github/v/release/ANKIT48274/offensec-ai?logo=github)](https://github.com/ANKIT48274/offensec-ai/releases)
 [![Open Source](https://img.shields.io/badge/Open%20Source-MIT-green)](LICENSE)
 
@@ -78,6 +78,7 @@ OffenSec AI is an open-source, AI-augmented offensive security assessment platfo
 - Attack path mapping
 - Executive summary generation
 - Automated remediation recommendations
+- **Fully offline** — rules-based engine with automatic fallback when the optional AI runner is not deployed
 
 ### Reporting
 | Format | Style |
@@ -188,12 +189,11 @@ graph TB
 
 ### Prerequisites
 
-- Python 3.12+
-- Node.js 22+
-- Docker Engine 24+ with Compose V2
-- PostgreSQL 16+
-- Redis 7+
-- Nmap, HTTPX, Nuclei (for scan features)
+- Docker Engine 24+ with Compose V2 (**recommended** — scan tools are bundled in the image)
+- Python 3.12+ *(manual install only)*
+- Node.js 22+ *(manual install only)*
+
+> **No manual tool installation needed.** The Docker image bundles Nmap, HTTPX, Nuclei, Katana, FFUF, whois, and dig. The platform works fully offline — AI correlation is rules-based with an automatic offline fallback.
 
 ### Docker Installation (Recommended)
 
@@ -202,14 +202,17 @@ graph TB
 git clone https://github.com/ANKIT48274/offensec-ai.git
 cd offensec-ai
 
-# Generate JWT secret
+# Generate JWT secret (required — no default secret)
 echo "JWT_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env
 
-# Start all services
+# Start all services (PostgreSQL, Redis, Backend, Frontend)
 docker compose up -d
 
 # Apply database migrations
 docker compose exec backend alembic upgrade head
+
+# Verify everything is healthy
+docker compose ps          # all services should show "(healthy)"
 
 # Access the platform
 # Frontend: http://localhost:3000
@@ -217,15 +220,18 @@ docker compose exec backend alembic upgrade head
 # Swagger:  http://localhost:8000/docs
 ```
 
+> **Note:** The first `docker compose up -d` builds the backend image and downloads the scan tools — this takes a few minutes. Subsequent runs are fast.
+
 ### Manual Installation
 
 ```bash
-# Backend
+# Backend (installs all deps, including bcrypt + PyJWT)
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e backend -e ai -e plugins -e knowledge
+pip install -e "backend[dev]" -e ai -e plugins -e knowledge
 
 # Database (ensure PostgreSQL and Redis are running)
+export DATABASE_URL="postgresql+asyncpg://offensec:changeme@localhost:5432/offensec"
 alembic upgrade head
 
 # Start backend
@@ -245,12 +251,16 @@ npm run dev
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `JWT_SECRET` | **Yes** | — | HMAC signing key (min 32 chars) |
+| `JWT_SECRET` | **Yes** | — | HMAC signing key (min 32 chars). **No default — server refuses to start without it.** |
 | `DATABASE_URL` | No | `postgresql+asyncpg://offensec:changeme@localhost:5432/offensec` | PostgreSQL connection string |
 | `REDIS_URL` | No | `redis://localhost:6379/0` | Redis connection string |
 | `CORS_ORIGINS` | No | `` | Comma-separated allowed origins |
 | `LOG_LEVEL` | No | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
 | `ENVIRONMENT` | No | `production` | Application environment |
+| `RATE_LIMIT_REQUESTS` | No | `120` | General API requests per window per client IP |
+| `RATE_LIMIT_WINDOW_SECONDS` | No | `60` | Rate-limit window |
+| `AUTH_RATE_LIMIT_REQUESTS` | No | `10` | Auth endpoint (login/register) requests per window — deters brute force |
+| `AUTH_RATE_LIMIT_WINDOW_SECONDS` | No | `60` | Auth rate-limit window |
 
 ---
 
@@ -275,11 +285,11 @@ npm run dev
 
 ## API Overview
 
-The API exposes **39 endpoints** across 12 resource groups.
+The API exposes **41 endpoints** across 13 resource groups.
 
 | Group | Prefix | Endpoints | Auth |
 |-------|--------|-----------|------|
-| Authentication | `/auth` | Register, Login, Me | No/Yes |
+| Authentication | `/auth` | Register, Login, Me, **Logout** | No/Yes |
 | Users | `/users` | Get, List | Yes |
 | Projects | `/projects` | CRUD | Yes |
 | Assessments | `/assessments` | CRUD + Start/Complete | Yes |
@@ -294,6 +304,8 @@ The API exposes **39 endpoints** across 12 resource groups.
 | Dashboard | `/dashboard` | Overview, Trends, Graph | Yes |
 | Plugins | `/plugins` | CRUD | Yes |
 
+**Health endpoints:** `/health` on the backend (port 8000) and `/health` on the frontend (port 3000) — used by container healthchecks and monitoring.
+
 Full documentation available at `/docs` when the backend is running.
 
 ---
@@ -302,13 +314,17 @@ Full documentation available at `/docs` when the backend is running.
 
 - **JWT Bearer authentication** on all endpoints (except register/login)
 - **bcrypt password hashing** with 12 rounds
-- **No hardcoded secrets** — all via environment variables
+- **Password hashes never exposed** — `register`, `me`, and user endpoints strip them
+- **Refresh token revocation** — `POST /auth/logout` blacklists the token in Redis; revoked tokens are rejected on every authenticated request
+- **API rate limiting** — Redis-backed sliding window; auth endpoints capped at 10 req/min to deter brute force
+- **No hardcoded secrets** — `JWT_SECRET` is required; no default fallback
 - **Subprocess input validation** — command injection prevention
 - **SQLAlchemy ORM** — no raw SQL queries
 - **CORS configuration** via environment
 - **Graceful process termination** — SIGTERM before SIGKILL
 - **Stderr output capped** at 64KB (OOM prevention)
 - **Temp file cleanup** with try/finally on all paths
+- **Generic auth errors** — login failures don't reveal whether an email is registered
 
 ---
 
@@ -324,14 +340,17 @@ Full documentation available at `/docs` when the backend is running.
 - ✅ Professional reports (Executive, Technical, OWASP, PTES)
 - ✅ Plugin system
 - ✅ Dashboard and analytics
-- ✅ 39 API endpoints, 179 tests
+- ✅ 41 API endpoints, 186 tests (179 unit/integration/security + 7 E2E)
+- ✅ Scan tools bundled in Docker image (no manual install)
 
-### v1.1.0 (Planned)
-- [ ] Background task queue (Celery/Redis)
+### v1.1.0 (Partially shipped)
+- ✅ API rate limiting (Redis-backed, stricter auth limits)
+- ✅ Refresh token revocation (Redis blacklist + logout endpoint)
+- ✅ E2E test suite (full user journey)
+- [ ] Background task queue (Celery/Redis) for non-blocking scans
 - [ ] WebSocket for live scan progress
 - [ ] Report PDF generation (WeasyPrint)
 - [ ] Light mode theme
-- [ ] API rate limiting
 - [ ] Rollback database migrations
 
 ### v2.0.0 (Future)
@@ -391,13 +410,25 @@ A: Yes. You control scope and exploitation. Passive scanning by default.
 ## Troubleshooting
 
 **Backend won't start: "JWT_SECRET is not set"**  
-→ Generate and set `JWT_SECRET` environment variable.
+→ Generate and set `JWT_SECRET` environment variable: `echo "JWT_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env`
 
-**Database connection error**  
-→ Ensure PostgreSQL is running and `DATABASE_URL` is correct.
+**Backend container shows "unhealthy"**  
+→ Check logs: `docker compose logs backend`. Health endpoint is `/health` — verify with `curl http://localhost:8000/health`.
 
-**Nmap not found**  
-→ Install nmap: `sudo apt install nmap` (Linux) or `brew install nmap` (macOS).
+**Frontend container shows "unhealthy"**  
+→ Health endpoint is `/health` on the frontend (returns 200 when serving). Verify: `curl http://localhost:8000/health` vs `curl http://localhost:3000/health`.
+
+**Nmap scan fails with "Nmap not found"**  
+→ The Docker image bundles nmap. If using manual install, install it: `sudo apt install nmap` (Linux) or `brew install nmap` (macOS).
+
+**Scan fails with "TCP/IP fingerprinting requires root privileges"**  
+→ This is expected in the non-root Docker container. OS fingerprinting (`-O`) is disabled there; port/service detection still works.
+
+**Login returns "Rate limit exceeded"**  
+→ Auth endpoints are capped at 10 req/min per IP. Wait a minute or raise `AUTH_RATE_LIMIT_REQUESTS` in `.env`.
+
+**Migrations not applied**  
+→ `docker compose exec backend alembic upgrade head`. The container reads `DATABASE_URL` from its environment.
 
 **Frontend shows "Network error"**  
 → Ensure backend is running on port 8000. Check Next.js API proxy in `next.config.js`.

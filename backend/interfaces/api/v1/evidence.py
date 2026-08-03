@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("")
 async def list_evidence(
-    project_id: str = Query(""),
+    project_id: str = Query(..., min_length=1, description="Project ID (required)"),
     source: str | None = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),

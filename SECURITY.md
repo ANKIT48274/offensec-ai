@@ -17,6 +17,14 @@ Authorization: Bearer <jwt_token>
 | Access Token | 60 minutes |
 | Refresh Token | 7 days |
 
+### Token Revocation
+
+Every token carries a unique `jti` claim. `POST /api/v1/auth/logout` blacklists the presented token in Redis for the remainder of its lifetime; blacklisted tokens are rejected with `401` on every authenticated endpoint.
+
+### Rate Limiting
+
+Auth endpoints (`/auth/login`, `/auth/register`) are rate-limited to **10 requests per minute per client IP** to deter credential brute-forcing. General API endpoints are limited to **120 requests per minute per client IP**. Limits are Redis-backed and configurable via `AUTH_RATE_LIMIT_REQUESTS`, `RATE_LIMIT_REQUESTS`, and window env vars.
+
 ### Setup
 
 Generate a secure JWT secret:
